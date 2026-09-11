@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Maintenance ALM — Abris Bac</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bl:#1B3A5C;--bll:#E8EFF7;--blm:#2E6DA4;
+  --or:#E07B2A;--orl:#FDF0E4;
+  --gr:#2A7A4B;--grl:#E4F5EC;
+  --rd:#C0392B;--rdl:#FCEAE8;
+  --bg:#F2F4F7;--card:#fff;
+  --text:#1a1a1a;--muted:#6B7280;
+  --border:#D1D5DB;--border2:#9CA3AF;
+  --radius:14px;--radius-sm:9px;
+}
+html,body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);min-height:100vh;font-size:15px}
+#app{max-width:520px;margin:0 auto;min-height:100vh;background:var(--bg)}
+
+/* ── HEADER ── */
+.hdr{background:var(--bl);color:#fff;padding:13px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.hdr-back{width:36px;height:36px;border-radius:9px;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:19px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-back:active{background:rgba(255,255,255,.3)}
+.hdr-title{font-size:15px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.01em}
+.hdr-sub{font-size:11px;opacity:.7;margin-top:1px}
+.hdr-btn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:7px 13px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.hdr-btn:active{background:rgba(255,255,255,.3)}
+.hdr-btn.or{background:var(--or)}
+
+/* ── PAGE ── */
+.pg{padding:14px 14px 48px}
+
+/* ── SEARCH ── */
+.search-wrap{position:relative;margin-bottom:14px}
+.search-wrap input{width:100%;padding:11px 14px 11px 40px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;background:var(--card);color:var(--text);outline:none}
+.search-wrap input:focus{border-color:var(--blm)}
+.search-wrap::before{content:'🔍';position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 6px;text-align:center}
+.stat-n{font-size:22px;font-weight:700;color:var(--bl)}
+.stat-l{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ── ZONE GROUP ── */
+.zone-hdr{font-size:11px;font-weight:700;color:var(--blm);text-transform:uppercase;letter-spacing:.06em;padding:12px 4px 6px;display:flex;align-items:center;gap:6px}
+.zone-hdr::after{content:'';flex:1;height:1px;background:var(--blm);opacity:.25}
+
+/* ── PAV CARD ── */
+.pav{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:7px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.pav:active{background:var(--bll)}
+.pav-badge{min-width:48px;height:48px;border-radius:10px;background:var(--bll);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.pav-badge span:first-child{font-size:11px;font-weight:700;color:var(--blm)}
+.pav-badge span:last-child{font-size:13px;font-weight:800;color:var(--bl)}
+.pav-info{flex:1;min-width:0}
+.pav-name{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pav-addr{font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pav-meta{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+.pav-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.dot-ok{width:10px;height:10px;border-radius:50%;background:var(--gr)}
+.dot-nok{width:10px;height:10px;border-radius:50%;background:var(--or)}
+.dot-none{width:10px;height:10px;border-radius:50%;background:#D1D5DB}
+.gps-link{font-size:18px;text-decoration:none}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.b-ok{background:var(--grl);color:var(--gr)}
+.b-or{background:var(--orl);color:var(--or)}
+.b-bl{background:var(--bll);color:var(--blm)}
+.b-rd{background:var(--rdl);color:var(--rd)}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:15px;margin-bottom:12px}
+.card-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+
+/* ── FIELDS ── */
+.field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.field input,.field textarea,.field select{width:100%;padding:10px 13px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:15px;font-family:inherit;color:var(--text);background:var(--card);-webkit-appearance:none;outline:none}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--blm)}
+.field textarea{min-height:72px;resize:vertical}
+
+/* ── TÂCHES ── */
+.task-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.task-row:last-child{border:none}
+.task-row input[type=checkbox]{width:22px;height:22px;accent-color:var(--blm);flex-shrink:0;cursor:pointer}
+.task-row label{font-size:14px;flex:1;cursor:pointer;line-height:1.3}
+.task-row .task-sta{font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0}
+.sta-ok{background:var(--grl);color:var(--gr)}
+.sta-ko{background:var(--rdl);color:var(--rd)}
+.sta-na{background:var(--bll);color:var(--blm)}
+
+/* ── PHOTOS ── */
+.ph-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ph-wrap{position:relative}
+.ph-img{aspect-ratio:1;width:100%;border-radius:8px;object-fit:cover;border:1px solid var(--border);display:block;cursor:zoom-in}
+.ph-del{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:var(--rd);color:#fff;border:none;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.ph-add{aspect-ratio:1;border:2px dashed var(--border2);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;background:var(--bll);color:var(--blm);font-size:12px;font-weight:600}
+.ph-add:active{background:#d0e3f5}
+.ph-add-icon{font-size:26px}
+
+/* ── CANVAS SIGNATURE ── */
+.sig-wrap{border:1.5px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden;background:#fff;touch-action:none}
+canvas#sig-canvas{display:block;width:100%;height:140px;cursor:crosshair}
+.sig-actions{display:flex;gap:8px;margin-top:8px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 18px;border-radius:var(--radius-sm);border:1.5px solid var(--border2);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text);background:var(--card)}
+.btn:active{opacity:.75}
+.btn-p{background:var(--bl);color:#fff;border-color:var(--bl)}
+.btn-p:active{background:#112840}
+.btn-or{background:var(--or);color:#fff;border-color:var(--or)}
+.btn-f{width:100%}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-d{background:var(--rdl);color:var(--rd);border-color:var(--rd)}
+.btn-row{display:flex;gap:8px}
+.btn-row .btn{flex:1}
+
+/* ── DETAIL ROWS ── */
+.dr{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+.dr:last-child{border:none}
+.dl{font-size:13px;color:var(--muted)}
+.dv{font-size:13px;font-weight:600;text-align:right;max-width:60%}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-icon{font-size:48px;margin-bottom:14px}
+.empty-text{font-size:15px;line-height:1.5}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 22px;border-radius:24px;font-size:14px;font-weight:600;z-index:9999;pointer-events:none;transition:opacity .4s;white-space:nowrap}
+
+/* ── LIGHTBOX ── */
+#lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:999;align-items:center;justify-content:center;cursor:zoom-out}
+#lightbox.open{display:flex}
+#lightbox img{max-width:95vw;max-height:90vh;border-radius:10px;object-fit:contain}
+#lb-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.2);border:none;color:#fff;font-size:24px;width:40px;height:40px;border-radius:50%;cursor:pointer}
+
+/* ── RAPPORT LIST ── */
+.rpt-row{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.rpt-row:active{background:var(--bll)}
+.rpt-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.rpt-pav{font-size:14px;font-weight:700}
+.rpt-date{font-size:11px;color:var(--muted)}
+.rpt-addr{font-size:12px;color:var(--muted)}
+
+/* ── ALERT ── */
+.alert-card{border:1.5px solid var(--rd);background:var(--rdl);border-radius:var(--radius);padding:14px;margin-top:10px}
+.alert-title{font-weight:700;color:var(--rd);margin-bottom:8px;font-size:14px}
+
+mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<input type="file" id="ph-in" accept="image/*" capture="environment" style="display:none">
+<div id="lightbox" onclick="closeLb()">
+  <button id="lb-close" onclick="event.stopPropagation();closeLb()">×</button>
+  <img id="lb-img" src="" alt="">
+</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   DONNÉES — 326 PAV
+══════════════════════════════════════════════ */
+const PAVS=[
+  {id:'PAV318',no:'318',nom:'A318',addr:'Place Sainte Thérèse',zone:'ALM - Barra',gps:'47.4800,-0.5646',rem:'Point double'},
+  {id:'PAV319',no:'319',nom:'A319',addr:'Place Sainte Thérèse',zone:'ALM - Barra',gps:'47.4800,-0.5646',rem:'Point double'},
+  {id:'PAV320',no:'320',nom:'A320',addr:'Rue du champ de bataille',zone:'ALM - Barra',gps:'47.4816,-0.5671'},
+  {id:'PAV198',no:'198',nom:'A198',addr:'10 Avenue Marie Talet',zone:'ALM - Besnardières',gps:'47.4765,-0.5475',rem:'Point double'},
+  {id:'PAV199',no:'199',nom:'A199',addr:'10 Avenue Marie Talet',zone:'ALM - Besnardières',gps:'47.4765,-0.5475',rem:'Point double'},
+  {id:'PAV200',no:'200',nom:'A200',addr:'39 rue Boreau',zone:'ALM - Besnardières',gps:'47.4761,-0.5452'},
+  {id:'PAV201',no:'201',nom:'A201',addr:'32 Avenue Besnardières',zone:'ALM - Besnardières',gps:'47.4777,-0.5460'},
+  {id:'PAV202',no:'202',nom:'A202',addr:'19 Rue Saint Samson',zone:'ALM - Besnardières',gps:'47.4771,-0.5441'},
+  {id:'PAV203',no:'203',nom:'A203',addr:"5 Allée Georges Pompidou",zone:'ALM - Besnardières',gps:'47.4765,-0.5429',rem:'Point double'},
+  {id:'PAV204',no:'204',nom:'A204',addr:'10 rue Menelick',zone:'ALM - Besnardières',gps:'47.4774,-0.5417',rem:'Point double'},
+  {id:'PAV205',no:'205',nom:'A205',addr:'10 rue Menelick',zone:'ALM - Besnardières',gps:'47.4774,-0.5417',rem:'Point double'},
+  {id:'PAV206',no:'206',nom:'A206',addr:'13 rue Belfort',zone:'ALM - Besnardières',gps:'47.4781,-0.5419'},
+  {id:'PAV207',no:'207',nom:'A207',addr:'12 Cour du Rocher',zone:'ALM - Besnardières',gps:'47.4796,-0.5402'},
+  {id:'PAV208',no:'208',nom:'A208',addr:'57 rue de la Chalouère',zone:'ALM - Besnardières',gps:'47.4801,-0.5392'},
+  {id:'PAV209',no:'209',nom:'A209',addr:'67 Avenue Jean Joxé',zone:'ALM - Besnardières',gps:'47.4813,-0.5429'},
+  {id:'PAV210',no:'210',nom:'A210',addr:'Place Raymond Toublanc',zone:'ALM - Besnardières',gps:'47.4800,-0.5435',rem:'Point double'},
+  {id:'PAV211',no:'211',nom:'A211',addr:'Place Raymond Toublanc',zone:'ALM - Besnardières',gps:'47.4800,-0.5435',rem:'Point double'},
+  {id:'PAV212',no:'212',nom:'A212',addr:'3 Rue Pilastre',zone:'ALM - Besnardières',gps:'47.4787,-0.5430'},
+  {id:'PAV213',no:'213',nom:'A213',addr:'14 rue du Docteur Bonhomme',zone:'ALM - Besnardières',gps:'47.4788,-0.5451'},
+  {id:'PAV308',no:'308',nom:'A308',addr:'39 rue du Pré Pigeon',zone:'ALM - Besnardières',gps:'47.4771,-0.5413'},
+  {id:'PAV325',no:'325',nom:'A325',addr:"5 Allée Georges Pompidou",zone:'ALM - Besnardières',gps:'47.4765,-0.5429',rem:'Point double'},
+  {id:'PAV140',no:'140',nom:'A140',addr:'Avenue de la Blancheraie',zone:'ALM - Blancheraie',gps:'47.4675,-0.5602'},
+  {id:'PAV141',no:'141',nom:'A141',addr:"Avenue de l'Esvière",zone:'ALM - Blancheraie',gps:'47.4677,-0.5618'},
+  {id:'PAV142',no:'142',nom:'A142',addr:'Place Monseigneur Rumeau',zone:'ALM - Blancheraie',gps:'47.4687,-0.5627'},
+  {id:'PAV143',no:'143',nom:'A143',addr:'Rue Quatrebarbes',zone:'ALM - Blancheraie',gps:'47.4689,-0.5613'},
+  {id:'PAV144',no:'144',nom:'A144',addr:'Avenue de la Blancheraie - Rue Faidherbe',zone:'ALM - Blancheraie',gps:'47.4662,-0.5628',rem:'Point double'},
+  {id:'PAV145',no:'145',nom:'A145',addr:'Avenue de la Blancheraie - Rue Faidherbe',zone:'ALM - Blancheraie',gps:'47.4662,-0.5628',rem:'Point double'},
+  {id:'PAV146',no:'146',nom:'A146',addr:'1 Rue Léon Pavot',zone:'ALM - Blancheraie',gps:'47.4662,-0.5650'},
+  {id:'PAV147',no:'147',nom:'A147',addr:'Rue Faidherbe',zone:'ALM - Blancheraie',gps:'47.4642,-0.5647',rem:'Point double'},
+  {id:'PAV148',no:'148',nom:'A148',addr:'Rue Faidherbe',zone:'ALM - Blancheraie',gps:'47.4642,-0.5647',rem:'Point double'},
+  {id:'PAV149',no:'149',nom:'A149',addr:'Rue Faidherbe/Rue Jacques Granneau',zone:'ALM - Blancheraie',gps:'47.4658,-0.5615',rem:'Point double'},
+  {id:'PAV197',no:'197',nom:'A197',addr:'3 Boulevard Marc Leclerc',zone:'ALM - Blancheraie',gps:'47.4645,-0.5657'},
+  {id:'PAV323',no:'323',nom:'A323',addr:'Rue Faidherbe/Rue Jacques Granneau',zone:'ALM - Blancheraie',gps:'47.4658,-0.5615',rem:'Point double'},
+  {id:'PAV214',no:'214',nom:'A214',addr:'12 rue Boisnet',zone:'ALM - Boisnet',gps:'47.4748,-0.5504'},
+  {id:'PAV215',no:'215',nom:'A215',addr:"39 rue Port de l'Ancre",zone:'ALM - Boisnet',gps:'47.4746,-0.5513'},
+  {id:'PAV216',no:'216',nom:'A216',addr:'2 rue Maillé',zone:'ALM - Boisnet',gps:'47.4758,-0.5504'},
+  {id:'PAV217',no:'217',nom:'A217',addr:"26 rue du port de l'Ancre",zone:'ALM - Boisnet',gps:'47.4751,-0.5517'},
+  {id:'PAV218',no:'218',nom:'A218',addr:"Rue du port de l'Ancre",zone:'ALM - Boisnet',gps:'47.4759,-0.5527'},
+  {id:'PAV219',no:'219',nom:'A219',addr:"Rue du port de l'Ancre",zone:'ALM - Boisnet',gps:'47.4766,-0.5536',rem:'Point double'},
+  {id:'PAV220',no:'220',nom:'A220',addr:"Rue du port de l'Ancre",zone:'ALM - Boisnet',gps:'47.4766,-0.5536',rem:'Point double'},
+  {id:'PAV221',no:'221',nom:'A221',addr:'Rue du Mail',zone:'ALM - Boisnet',gps:'47.4755,-0.5544'},
+  {id:'PAV222',no:'222',nom:'A222',addr:'31 rue Boisnet',zone:'ALM - Boisnet',gps:'47.4744,-0.5525'},
+  {id:'PAV223',no:'223',nom:'A223',addr:'48 rue Parcheminerie',zone:'ALM - Boisnet',gps:'47.4738,-0.5515'},
+  {id:'PAV224',no:'224',nom:'A224',addr:'37 rue Plantagenet',zone:'ALM - Boisnet',gps:'47.4723,-0.5546',rem:'Point double'},
+  {id:'PAV225',no:'225',nom:'A225',addr:'9 rue Millet',zone:'ALM - Boisnet',gps:'47.4724,-0.5556'},
+  {id:'PAV226',no:'226',nom:'A226',addr:'Place Molière',zone:'ALM - Boisnet',gps:'47.4738,-0.5553',rem:'Point double'},
+  {id:'PAV227',no:'227',nom:'A227',addr:'Place Molière',zone:'ALM - Boisnet',gps:'47.4738,-0.5553',rem:'Point double'},
+  {id:'PAV326',no:'326',nom:'A326',addr:'37 rue Plantagenet',zone:'ALM - Boisnet',gps:'47.4723,-0.5546',rem:'Point double'},
+  {id:'PAV259',no:'259',nom:'A259',addr:'24 rue Auguste Blandeau',zone:'ALM - Bon Repos',gps:'47.4568,-0.5454'},
+  {id:'PAV260',no:'260',nom:'A260',addr:"Rue d'Orgemont",zone:'ALM - Bon Repos',gps:'47.4547,-0.5482'},
+  {id:'PAV261',no:'261',nom:'A261',addr:"Rue d'Orgemont",zone:'ALM - Bon Repos',gps:'47.4544,-0.5472'},
+  {id:'PAV262',no:'262',nom:'A262',addr:'22 Avenue de Tressigny X Rue Bon Repos',zone:'ALM - Bon Repos',gps:'47.4560,-0.5434'},
+  {id:'PAV274',no:'274',nom:'A274',addr:'29 Rue de la Morellerie',zone:'ALM - Bon Repos',gps:'47.4529,-0.5430',rem:'Point double'},
+  {id:'PAV275',no:'275',nom:'A275',addr:'29 Rue de la Morellerie',zone:'ALM - Bon Repos',gps:'47.4529,-0.5430',rem:'Point double'},
+  {id:'PAV276',no:'276',nom:'A276',addr:'21 Rue du Marquis de Turbilly',zone:'ALM - Bon Repos',gps:'47.4545,-0.5436',rem:'Point double'},
+  {id:'PAV277',no:'277',nom:'A277',addr:'21 Rue du Marquis de Turbilly',zone:'ALM - Bon Repos',gps:'47.4545,-0.5436',rem:'Point double'},
+  {id:'PAV278',no:'278',nom:'A278',addr:'58 Rue du Bon Repos',zone:'ALM - Bon Repos',gps:'47.4537,-0.5458'},
+  {id:'PAV051',no:'51',nom:'A051',addr:'Boulevard du Vaugareau',zone:'ALM - Brisepotière',gps:'47.4832,-0.5336'},
+  {id:'PAV052',no:'52',nom:'A052',addr:'Rue du Roussillon',zone:'ALM - Brisepotière',gps:'47.4821,-0.5311'},
+  {id:'PAV053',no:'53',nom:'A053',addr:'Rue Jacques Cartier',zone:'ALM - Brisepotière',gps:'47.4806,-0.5334',rem:'Point double'},
+  {id:'PAV054',no:'54',nom:'A054',addr:'Rue Chanoine Jean Brac',zone:'ALM - Brisepotière',gps:'47.4804,-0.5312'},
+  {id:'PAV055',no:'55',nom:'A055',addr:'Avenue Pasteur',zone:'ALM - Brisepotière',gps:'47.4792,-0.5279',rem:'Point double'},
+  {id:'PAV056',no:'56',nom:'A056',addr:'Avenue Pasteur',zone:'ALM - Brisepotière',gps:'47.4792,-0.5279',rem:'Point double'},
+  {id:'PAV057',no:'57',nom:'A057',addr:'Rue Prosper Bigeard',zone:'ALM - Brisepotière',gps:'47.4790,-0.5375'},
+  {id:'PAV058',no:'58',nom:'A058',addr:'Rue Villebois Mareuil',zone:'ALM - Brisepotière',gps:'47.4791,-0.5347'},
+  {id:'PAV059',no:'59',nom:'A059',addr:'Rue Victor HUGO',zone:'ALM - Brisepotière',gps:'47.4783,-0.5344'},
+  {id:'PAV060',no:'60',nom:'A060',addr:"Rue d'Hedouville",zone:'ALM - Brisepotière',gps:'47.4786,-0.5332',rem:'Point double'},
+  {id:'PAV061',no:'61',nom:'A061',addr:'Rue Paul Henry',zone:'ALM - Brisepotière',gps:'47.4792,-0.5315'},
+  {id:'PAV062',no:'62',nom:'A062',addr:'Avenue du Général Foy',zone:'ALM - Brisepotière',gps:'47.4786,-0.5299'},
+  {id:'PAV063',no:'63',nom:'A063',addr:'Rue des Lutins',zone:'ALM - Brisepotière',gps:'47.4766,-0.5363'},
+  {id:'PAV064',no:'64',nom:'A064',addr:'Avenue Pasteur',zone:'ALM - Brisepotière',gps:'47.4765,-0.5329'},
+  {id:'PAV065',no:'65',nom:'A065',addr:'Rue Jean Joxé',zone:'ALM - Brisepotière',gps:'47.4848,-0.5412'},
+  {id:'PAV248',no:'248',nom:'A248',addr:'Rue Jacques Cartier',zone:'ALM - Brisepotière',gps:'47.4806,-0.5334',rem:'Point double'},
+  {id:'PAV249',no:'249',nom:'A249',addr:"Rue d'Hedouville",zone:'ALM - Brisepotière',gps:'47.4786,-0.5332',rem:'Point double'},
+  {id:'PAV293',no:'293',nom:'A293',addr:'1 Clos Jeanne Jugan',zone:'ALM - Brisepotière',gps:'47.4818,-0.5364'},
+  {id:'PAV294',no:'294',nom:'A294',addr:'11 rue du Chanoine Jean Brac',zone:'ALM - Brisepotière',gps:'47.4810,-0.5331'},
+  {id:'PAV035',no:'35',nom:'A001',addr:'Place Lafayette',zone:'ALM - Brissac Lafayette',gps:'47.4625,-0.5547',rem:'Point double'},
+  {id:'PAV037',no:'37',nom:'A002',addr:'Place Lafayette',zone:'ALM - Brissac Lafayette',gps:'47.4627,-0.5535',rem:'Point double'},
+  {id:'PAV044',no:'44',nom:'A003',addr:'Rue du Clon',zone:'ALM - Brissac Lafayette',gps:'47.4606,-0.5516'},
+  {id:'PAV049',no:'49',nom:'A004',addr:'Rue Evain',zone:'ALM - Brissac Lafayette',gps:'47.4605,-0.5532',rem:'Point double'},
+  {id:'PAV047',no:'47',nom:'A005',addr:'Rue Gutenberg',zone:'ALM - Brissac Lafayette',gps:'47.4584,-0.5539',rem:'Point double'},
+  {id:'PAV045',no:'45',nom:'A006',addr:'Rue Dupetit Thouars',zone:'ALM - Brissac Lafayette',gps:'47.4589,-0.5519',rem:'Point double'},
+  {id:'PAV039',no:'39',nom:'A007',addr:'Rue Jean Bodin',zone:'ALM - Brissac Lafayette',gps:'47.4635,-0.5550'},
+  {id:'PAV040',no:'40',nom:'A008',addr:'Rue de Brissac',zone:'ALM - Brissac Lafayette',gps:'47.4646,-0.5505'},
+  {id:'PAV041',no:'41',nom:'A009',addr:'Rue de Brissac',zone:'ALM - Brissac Lafayette',gps:'47.4630,-0.5494'},
+  {id:'PAV042',no:'42',nom:'A010',addr:'Rue de Brissac',zone:'ALM - Brissac Lafayette',gps:'47.4619,-0.5485',rem:'Point double'},
+  {id:'PAV036',no:'36',nom:'A045',addr:'Place Lafayette',zone:'ALM - Brissac Lafayette',gps:'47.4625,-0.5547',rem:'Point double'},
+  {id:'PAV038',no:'38',nom:'A046',addr:'Place Lafayette',zone:'ALM - Brissac Lafayette',gps:'47.4627,-0.5535',rem:'Point double'},
+  {id:'PAV050',no:'50',nom:'A047',addr:'Rue Evain',zone:'ALM - Brissac Lafayette',gps:'47.4605,-0.5532',rem:'Point double'},
+  {id:'PAV048',no:'48',nom:'A048',addr:'Rue Gutenberg',zone:'ALM - Brissac Lafayette',gps:'47.4584,-0.5539',rem:'Point double'},
+  {id:'PAV046',no:'46',nom:'A049',addr:'Rue Dupetit Thouars',zone:'ALM - Brissac Lafayette',gps:'47.4589,-0.5519',rem:'Point double'},
+  {id:'PAV043',no:'43',nom:'A050',addr:'Rue de Brissac',zone:'ALM - Brissac Lafayette',gps:'47.4619,-0.5485',rem:'Point double'},
+  {id:'PAV305',no:'305',nom:'A305',addr:'42 Rue Adrien Recouvreur',zone:'ALM - Chevrollier',gps:'47.4535,-0.5576',rem:'Point double'},
+  {id:'PAV306',no:'306',nom:'A306',addr:'42 Rue Adrien Recouvreur',zone:'ALM - Chevrollier',gps:'47.4535,-0.5576',rem:'Point double'},
+  {id:'PAV066',no:'66',nom:'A066',addr:'Rue de Rennes',zone:'ALM - François Mitterrand',gps:'47.4765,-0.5497',rem:'Point double'},
+  {id:'PAV067',no:'67',nom:'A067',addr:'Rue de Rennes',zone:'ALM - François Mitterrand',gps:'47.4765,-0.5497',rem:'Point double'},
+  {id:'PAV068',no:'68',nom:'A068',addr:'Rue de Rennes',zone:'ALM - François Mitterrand',gps:'47.4781,-0.5483',rem:'Point double'},
+  {id:'PAV069',no:'69',nom:'A069',addr:'Rue de Rennes',zone:'ALM - François Mitterrand',gps:'47.4781,-0.5483',rem:'Point double'},
+  {id:'PAV070',no:'70',nom:'A070',addr:'Rue René Douchy',zone:'ALM - François Mitterrand',gps:'47.4805,-0.5460'},
+  {id:'PAV071',no:'71',nom:'A071',addr:'Rue Suzanne Bouvet',zone:'ALM - François Mitterrand',gps:'47.4804,-0.5452'},
+  {id:'PAV102',no:'102',nom:'A102',addr:'Rue Fulton',zone:'ALM - Fulton',gps:'47.4634,-0.5587'},
+  {id:'PAV103',no:'103',nom:'A103',addr:'Rue Fulton',zone:'ALM - Fulton',gps:'47.4635,-0.5570'},
+  {id:'PAV104',no:'104',nom:'A104',addr:'3 Boulevard Yvonne Poirel',zone:'ALM - Fulton',gps:'47.4619,-0.5623'},
+  {id:'PAV105',no:'105',nom:'A105',addr:'Rond Point des Arts',zone:'ALM - Fulton',gps:'47.4619,-0.5590'},
+  {id:'PAV106',no:'106',nom:'A106',addr:'Rue Desportes',zone:'ALM - Fulton',gps:'47.4623,-0.5565'},
+  {id:'PAV107',no:'107',nom:'A107',addr:'Rue Jean Perrin',zone:'ALM - Fulton',gps:'47.4607,-0.5610'},
+  {id:'PAV108',no:'108',nom:'A108',addr:'Rue Eugène Roinet',zone:'ALM - Fulton',gps:'47.4608,-0.5586'},
+  {id:'PAV109',no:'109',nom:'A109',addr:'Boulevard Yvonne Poirel',zone:'ALM - Fulton',gps:'47.4597,-0.5606'},
+  {id:'PAV110',no:'110',nom:'A110',addr:'Avenue Vauban',zone:'ALM - Fulton',gps:'47.4600,-0.5587'},
+  {id:'PAV111',no:'111',nom:'A111',addr:'Avenue Chanzy',zone:'ALM - Fulton',gps:'47.4604,-0.5549',rem:'Point double'},
+  {id:'PAV112',no:'112',nom:'A112',addr:'Rue Gustave Mareau/Rue Frémur',zone:'ALM - Fulton',gps:'47.4595,-0.5584'},
+  {id:'PAV113',no:'113',nom:'A113',addr:'1 Rue Kléber',zone:'ALM - Fulton',gps:'47.4579,-0.5560'},
+  {id:'PAV324',no:'324',nom:'A324',addr:'Avenue Chanzy',zone:'ALM - Fulton',gps:'47.4604,-0.5549',rem:'Point double'},
+  {id:'PAV150',no:'150',nom:'A150',addr:'Place Pierre Semard',zone:'ALM - Gare',gps:'47.4652,-0.5589',rem:'Point double'},
+  {id:'PAV151',no:'151',nom:'A151',addr:'Place Pierre Semard',zone:'ALM - Gare',gps:'47.4652,-0.5589',rem:'Point double'},
+  {id:'PAV152',no:'152',nom:'A152',addr:'Rue René Brémont',zone:'ALM - Gare',gps:'47.4659,-0.5593'},
+  {id:'PAV153',no:'153',nom:'A153',addr:"Place de l'académie",zone:'ALM - Gare',gps:'47.4679,-0.5589'},
+  {id:'PAV154',no:'154',nom:'A154',addr:'Place de la Visitation',zone:'ALM - Gare',gps:'47.4666,-0.5571',rem:'Point double'},
+  {id:'PAV155',no:'155',nom:'A155',addr:'Place de la Visitation',zone:'ALM - Gare',gps:'47.4666,-0.5571',rem:'Point double'},
+  {id:'PAV156',no:'156',nom:'A156',addr:'Place Anquetil',zone:'ALM - Gare',gps:'47.4655,-0.5555',rem:'Point double'},
+  {id:'PAV157',no:'157',nom:'A157',addr:'Place Anquetil',zone:'ALM - Gare',gps:'47.4655,-0.5555',rem:'Point double'},
+  {id:'PAV158',no:'158',nom:'A158',addr:'Boulevard du Roi René',zone:'ALM - Gare',gps:'47.4674,-0.5558'},
+  {id:'PAV159',no:'159',nom:'A159',addr:'58 Boulevard du Roi René',zone:'ALM - Gare',gps:'47.4667,-0.5541',rem:'Point double'},
+  {id:'PAV160',no:'160',nom:'A160',addr:'58 Boulevard du Roi René',zone:'ALM - Gare',gps:'47.4667,-0.5541',rem:'Point double'},
+  {id:'PAV161',no:'161',nom:'A161',addr:'11 Rue Paul Bert',zone:'ALM - Gare',gps:'47.4660,-0.5517',rem:'Point double'},
+  {id:'PAV162',no:'162',nom:'A162',addr:'11 Rue Paul Bert',zone:'ALM - Gare',gps:'47.4660,-0.5517',rem:'Point double'},
+  {id:'PAV129',no:'129',nom:'A129',addr:'Rue Jean Marie Raimbault',zone:'ALM - Gâte Argent',gps:'47.4725,-0.5385'},
+  {id:'PAV130',no:'130',nom:'A130',addr:'59 bis Rue Larevellière',zone:'ALM - Gâte Argent',gps:'47.4718,-0.5376'},
+  {id:'PAV131',no:'131',nom:'A131',addr:'59 bis Rue Larevellière',zone:'ALM - Gâte Argent',gps:'47.4718,-0.5375'},
+  {id:'PAV132',no:'132',nom:'A132',addr:'88 Rue Larevellière',zone:'ALM - Gâte Argent',gps:'47.4714,-0.5341',rem:'Point double'},
+  {id:'PAV133',no:'133',nom:'A133',addr:'88 rue Larevellière',zone:'ALM - Gâte Argent',gps:'47.4714,-0.5341',rem:'Point double'},
+  {id:'PAV134',no:'134',nom:'A134',addr:'Rue Levavasseur / Rue Larevellière',zone:'ALM - Gâte Argent',gps:'47.4713,-0.5326'},
+  {id:'PAV135',no:'135',nom:'A135',addr:'Rue Levavasseur',zone:'ALM - Gâte Argent',gps:'47.4723,-0.5320'},
+  {id:'PAV136',no:'136',nom:'A136',addr:'Avenue Pasteur - Rue Béranger',zone:'ALM - Gâte Argent',gps:'47.4739,-0.5372'},
+  {id:'PAV137',no:'137',nom:'A137',addr:'Rue des Banchais',zone:'ALM - Gâte Argent',gps:'47.4748,-0.5339'},
+  {id:'PAV138',no:'138',nom:'A138',addr:'Rue Chaptal',zone:'ALM - Gâte Argent',gps:'47.4739,-0.5308',rem:'Point double'},
+  {id:'PAV139',no:'139',nom:'A139',addr:'Rue Chaptal',zone:'ALM - Gâte Argent',gps:'47.4739,-0.5308',rem:'Point double'},
+  {id:'PAV164',no:'164',nom:'A164',addr:'Rue Georges Bernanos',zone:'ALM - Haut Pressoir',gps:'47.4592,-0.5412'},
+  {id:'PAV165',no:'165',nom:'A165',addr:'Rue Chèvre',zone:'ALM - Haut Pressoir',gps:'47.4558,-0.5380'},
+  {id:'PAV166',no:'166',nom:'A166',addr:'Rue Dainville/Henri Bouriché',zone:'ALM - Haut Pressoir',gps:'47.4591,-0.5381'},
+  {id:'PAV196',no:'196',nom:'A196',addr:'43 rue Dainville',zone:'ALM - Haut Pressoir',gps:'47.4579,-0.5398'},
+  {id:'PAV279',no:'279',nom:'A279',addr:'31 Rue des Ponts de cé',zone:'ALM - Haut Pressoir',gps:'47.4574,-0.5432',rem:'Point double'},
+  {id:'PAV280',no:'280',nom:'A280',addr:'31 Rue des Ponts de cé',zone:'ALM - Haut Pressoir',gps:'47.4574,-0.5432',rem:'Point double'},
+  {id:'PAV281',no:'281',nom:'A281',addr:'74 Rue des Ponts de cé',zone:'ALM - Haut Pressoir',gps:'47.4558,-0.5408',rem:'Point double'},
+  {id:'PAV282',no:'282',nom:'A282',addr:'74 Rue des Ponts de cé',zone:'ALM - Haut Pressoir',gps:'47.4558,-0.5408',rem:'Point double'},
+  {id:'PAV283',no:'283',nom:'A283',addr:'81 Rue des Ponts de cé',zone:'ALM - Haut Pressoir',gps:'47.4536,-0.5396',rem:'Point double'},
+  {id:'PAV284',no:'284',nom:'A284',addr:'81 Rue des Ponts de cé',zone:'ALM - Haut Pressoir',gps:'47.4536,-0.5396',rem:'Point double'},
+  {id:'PAV020',no:'20',nom:'A030',addr:'99 rue Saint Nicolas',zone:'ALM - La Doutre',gps:'47.4742,-0.5666',rem:'Point double'},
+  {id:'PAV021',no:'21',nom:'A031',addr:'30 boulevard Descazeaux',zone:'ALM - La Doutre',gps:'47.4763,-0.5660'},
+  {id:'PAV022',no:'22',nom:'A032',addr:'9 rue des Pénitentes',zone:'ALM - La Doutre',gps:'47.4752,-0.5639'},
+  {id:'PAV023',no:'23',nom:'A033',addr:'Place Grégoire Bordillon',zone:'ALM - La Doutre',gps:'47.4745,-0.5616',rem:'Point double'},
+  {id:'PAV024',no:'24',nom:'A034',addr:'14 rue des Carmes',zone:'ALM - La Doutre',gps:'47.4737,-0.5603'},
+  {id:'PAV025',no:'25',nom:'A035',addr:'23 rue des Terras',zone:'ALM - La Doutre',gps:'47.4730,-0.5635',rem:'Point double'},
+  {id:'PAV026',no:'26',nom:'A036',addr:'48-50 rue Lionnaise',zone:'ALM - La Doutre',gps:'47.4777,-0.5640'},
+  {id:'PAV027',no:'27',nom:'A037',addr:'39 boulevard Daviers',zone:'ALM - La Doutre',gps:'47.4788,-0.5642',rem:'Point double'},
+  {id:'PAV028',no:'28',nom:'A038',addr:'39 Boulevard Daviers',zone:'ALM - La Doutre',gps:'47.4788,-0.5642',rem:'Point double'},
+  {id:'PAV029',no:'29',nom:'A039',addr:'19 place de la Paix',zone:'ALM - La Doutre',gps:'47.4786,-0.5608'},
+  {id:'PAV030',no:'30',nom:'A040',addr:'46 rue Lionnaise',zone:'ALM - La Doutre',gps:'47.4766,-0.5632'},
+  {id:'PAV031',no:'31',nom:'A041',addr:"28 rue de l'Hommeau",zone:'ALM - La Doutre',gps:'47.4771,-0.5616'},
+  {id:'PAV032',no:'32',nom:'A042',addr:'4, place du Tertre',zone:'ALM - La Doutre',gps:'47.4769,-0.5602'},
+  {id:'PAV033',no:'33',nom:'A043',addr:'6 rue Saint Jean',zone:'ALM - La Doutre',gps:'47.4775,-0.5581'},
+  {id:'PAV034',no:'34',nom:'A044',addr:'1 Boulevard Descazeaux',zone:'ALM - La Doutre',gps:'47.4754,-0.5629'},
+  {id:'PAV272',no:'272',nom:'A272',addr:'99 rue Saint Nicolas',zone:'ALM - La Doutre',gps:'47.4742,-0.5666',rem:'Point double'},
+  {id:'PAV273',no:'273',nom:'A273',addr:'Place Grégoire Bordillon',zone:'ALM - La Doutre',gps:'47.4745,-0.5616',rem:'Point double'},
+  {id:'PAV285',no:'285',nom:'A285',addr:'23 rue des Terras',zone:'ALM - La Doutre',gps:'47.4730,-0.5635',rem:'Point double'},
+  {id:'PAV311',no:'311',nom:'A311',addr:'Boulevard du Ronceray',zone:'ALM - La Doutre',gps:'47.4749,-0.5590'},
+  {id:'PAV312',no:'312',nom:'A312',addr:'Boulevard Gaston dumesnil',zone:'ALM - La Doutre',gps:'47.4733,-0.5663'},
+  {id:'PAV313',no:'313',nom:'A313',addr:'22 Place Monprofit',zone:'ALM - La Doutre',gps:'47.4738,-0.5675'},
+  {id:'PAV314',no:'314',nom:'A314',addr:'2 Place Monprofit',zone:'ALM - La Doutre',gps:'47.4747,-0.5675'},
+  {id:'PAV315',no:'315',nom:'A315',addr:'20 Boulevard Georges Clemenceau',zone:'ALM - La Doutre',gps:'47.4768,-0.5662'},
+  {id:'PAV316',no:'316',nom:'A316',addr:'13 Boulevard Georges Clemenceau',zone:'ALM - La Doutre',gps:'47.4773,-0.5657'},
+  {id:'PAV317',no:'317',nom:'A317',addr:'14 Boulevard Daviers',zone:'ALM - La Doutre',gps:'47.4792,-0.5574'},
+  {id:'PAV295',no:'295',nom:'A295',addr:"68 A Rue d'Orgemont",zone:'ALM - Lorette',gps:'47.4525,-0.5451',rem:'Point double'},
+  {id:'PAV296',no:'296',nom:'A296',addr:"68 A Rue d'Orgemont",zone:'ALM - Lorette',gps:'47.4525,-0.5451',rem:'Point double'},
+  {id:'PAV297',no:'297',nom:'A297',addr:'10 Rue Alexis Axilette',zone:'ALM - Lorette',gps:'47.4522,-0.5473'},
+  {id:'PAV298',no:'298',nom:'A298',addr:'1 Rue Alexis Axilette',zone:'ALM - Lorette',gps:'47.4525,-0.5488'},
+  {id:'PAV299',no:'299',nom:'A299',addr:'43 Rue de Beauval',zone:'ALM - Lorette',gps:'47.4517,-0.5505',rem:'Point double'},
+  {id:'PAV300',no:'300',nom:'A300',addr:'43 Rue de Beauval',zone:'ALM - Lorette',gps:'47.4517,-0.5505',rem:'Point double'},
+  {id:'PAV301',no:'301',nom:'A301',addr:'33 Rue de Beauval',zone:'ALM - Lorette',gps:'47.4525,-0.5507'},
+  {id:'PAV302',no:'302',nom:'A302',addr:'9 Rue Georges Guynemer',zone:'ALM - Lorette',gps:'47.4533,-0.5505'},
+  {id:'PAV303',no:'303',nom:'A303',addr:'1 Rue Georges Guynemer',zone:'ALM - Lorette',gps:'47.4543,-0.5494'},
+  {id:'PAV304',no:'304',nom:'A304',addr:"2bis Rue d'Epluchard",zone:'ALM - Lorette',gps:'47.4558,-0.5511'},
+  {id:'PAV241',no:'241',nom:'A241',addr:'12 bis rue de Belgique',zone:'ALM - Louis Gain',gps:'47.4709,-0.5416'},
+  {id:'PAV242',no:'242',nom:'A242',addr:'46 rue Constant Lemoine',zone:'ALM - Louis Gain',gps:'47.4717,-0.5393'},
+  {id:'PAV243',no:'243',nom:'A243',addr:'Rue André Gardot',zone:'ALM - Louis Gain',gps:'47.4676,-0.5356'},
+  {id:'PAV244',no:'244',nom:'A244',addr:'48 Rue André Gardot',zone:'ALM - Louis Gain',gps:'47.4683,-0.5331'},
+  {id:'PAV245',no:'245',nom:'A245',addr:'Rue Louis Legendre',zone:'ALM - Louis Gain',gps:'47.4681,-0.5307'},
+  {id:'PAV246',no:'246',nom:'A246',addr:'Rue Mathilde Alanic',zone:'ALM - Louis Gain',gps:'47.4674,-0.5320'},
+  {id:'PAV247',no:'247',nom:'A247',addr:'Rue de la Rame',zone:'ALM - Louis Gain',gps:'47.4691,-0.5382'},
+  {id:'PAV286',no:'286',nom:'A286',addr:'4 rue Saint Exupéry',zone:'ALM - Louis Gain',gps:'47.4681,-0.5368'},
+  {id:'PAV287',no:'287',nom:'A287',addr:'2 rue du Petit Prince',zone:'ALM - Louis Gain',gps:'47.4688,-0.5351'},
+  {id:'PAV288',no:'288',nom:'A288',addr:'11 rue Louis Gain',zone:'ALM - Louis Gain',gps:'47.4698,-0.5422',rem:'Point double'},
+  {id:'PAV289',no:'289',nom:'A289',addr:'11 rue Louis Gain',zone:'ALM - Louis Gain',gps:'47.4698,-0.5422',rem:'Point double'},
+  {id:'PAV290',no:'290',nom:'A290',addr:'21 rue Louis Gain',zone:'ALM - Louis Gain',gps:'47.4690,-0.5400'},
+  {id:'PAV128',no:'128',nom:'A128',addr:'Avenue Pasteur / Avenue Pierre Lise',zone:'ALM - Mail',gps:'47.4721,-0.5416',rem:'Point double'},
+  {id:'PAV228',no:'228',nom:'A228',addr:'Avenue Pasteur / Avenue Pierre Lise',zone:'ALM - Mail',gps:'47.4721,-0.5416',rem:'Point double'},
+  {id:'PAV229',no:'229',nom:'A229',addr:'Avenue Pasteur',zone:'ALM - Mail',gps:'47.4718,-0.5427'},
+  {id:'PAV230',no:'230',nom:'A230',addr:'17 rue Joubert',zone:'ALM - Mail',gps:'47.4720,-0.5436'},
+  {id:'PAV231',no:'231',nom:'A231',addr:'Rue Savary',zone:'ALM - Mail',gps:'47.4724,-0.5428'},
+  {id:'PAV232',no:'232',nom:'A232',addr:'19 Boulevard du Maréchal Joffre',zone:'ALM - Mail',gps:'47.4715,-0.5438'},
+  {id:'PAV233',no:'233',nom:'A233',addr:'Boulevard Maréchal Joffre',zone:'ALM - Mail',gps:'47.4719,-0.5450'},
+  {id:'PAV234',no:'234',nom:'A234',addr:'Place Mendes France',zone:'ALM - Mail',gps:'47.4727,-0.5456'},
+  {id:'PAV235',no:'235',nom:'A235',addr:'Rue du Quinconce',zone:'ALM - Mail',gps:'47.4699,-0.5461'},
+  {id:'PAV236',no:'236',nom:'A236',addr:'11 Boulevard Foch',zone:'ALM - Mail',gps:'47.4689,-0.5493'},
+  {id:'PAV237',no:'237',nom:'A237',addr:'10 rue hanneloup',zone:'ALM - Mail',gps:'47.4686,-0.5484',rem:'Point double'},
+  {id:'PAV238',no:'238',nom:'A238',addr:'10 rue hanneloup',zone:'ALM - Mail',gps:'47.4686,-0.5484',rem:'Point double'},
+  {id:'PAV239',no:'239',nom:'A239',addr:'47 bis rue Bressigny',zone:'ALM - Mail',gps:'47.4671,-0.5492'},
+  {id:'PAV240',no:'240',nom:'A240',addr:'34 rue Chateaugontier',zone:'ALM - Mail',gps:'47.4657,-0.5503'},
+  {id:'PAV263',no:'263',nom:'A263',addr:'88 rue Rabelais',zone:'ALM - Mirabeau',gps:'47.4593,-0.5454'},
+  {id:'PAV264',no:'264',nom:'A264',addr:'27 rue Merlet de Laboulaye',zone:'ALM - Mirabeau',gps:'47.4613,-0.5464',rem:'Point double'},
+  {id:'PAV265',no:'265',nom:'A265',addr:'54 rue de Brissac',zone:'ALM - Mirabeau',gps:'47.4599,-0.5468'},
+  {id:'PAV266',no:'266',nom:'A266',addr:'Rue Cesar Geoffray',zone:'ALM - Mirabeau',gps:'47.4585,-0.5455'},
+  {id:'PAV267',no:'267',nom:'A267',addr:'Rue de Locarno',zone:'ALM - Mirabeau',gps:'47.4570,-0.5509'},
+  {id:'PAV268',no:'268',nom:'A268',addr:'Rue Pierre Curie',zone:'ALM - Mirabeau',gps:'47.4566,-0.5477'},
+  {id:'PAV269',no:'269',nom:'A269',addr:'161 Bd de Strasbourg',zone:'ALM - Mirabeau',gps:'47.4565,-0.5525'},
+  {id:'PAV270',no:'270',nom:'A270',addr:'Rue de la Fontaine',zone:'ALM - Mirabeau',gps:'47.4600,-0.5501'},
+  {id:'PAV271',no:'271',nom:'A271',addr:'38 rue du Docteur Guichard',zone:'ALM - Mirabeau',gps:'47.4578,-0.5473'},
+  {id:'PAV181',no:'181',nom:'A181',addr:'87 rue de la Madeleine',zone:'ALM - Noyers',gps:'47.4619,-0.5393'},
+  {id:'PAV182',no:'182',nom:'A182',addr:'1 rue Saumuroise',zone:'ALM - Noyers',gps:'47.4601,-0.5372'},
+  {id:'PAV183',no:'183',nom:'A183',addr:'4 rue du Haut Pressoir',zone:'ALM - Noyers',gps:'47.4593,-0.5361'},
+  {id:'PAV184',no:'184',nom:'A184',addr:'16 rue de Messine',zone:'ALM - Noyers',gps:'47.4607,-0.5328'},
+  {id:'PAV185',no:'185',nom:'A185',addr:'42 boulevard Pierre de Coubertin',zone:'ALM - Noyers',gps:'47.4616,-0.5327'},
+  {id:'PAV186',no:'186',nom:'A186',addr:'6 rue de Tunis',zone:'ALM - Noyers',gps:'47.4619,-0.5364'},
+  {id:'PAV187',no:'187',nom:'A187',addr:'2 rue Lebas',zone:'ALM - Noyers',gps:'47.4629,-0.5377'},
+  {id:'PAV188',no:'188',nom:'A188',addr:'2 rue Edison',zone:'ALM - Noyers',gps:'47.4636,-0.5353'},
+  {id:'PAV189',no:'189',nom:'A189',addr:'2 rue Desmazières',zone:'ALM - Noyers',gps:'47.4625,-0.5347'},
+  {id:'PAV190',no:'190',nom:'A190',addr:'42 rue des Noyers',zone:'ALM - Noyers',gps:'47.4648,-0.5336'},
+  {id:'PAV191',no:'191',nom:'A191',addr:'11 rue des Noyers',zone:'ALM - Noyers',gps:'47.4652,-0.5313'},
+  {id:'PAV192',no:'192',nom:'A192',addr:'3 Square Léo Delibes',zone:'ALM - Noyers',gps:'47.4643,-0.5317'},
+  {id:'PAV193',no:'193',nom:'A193',addr:'4 Rue de la Devansaye',zone:'ALM - Noyers',gps:'47.4656,-0.5366'},
+  {id:'PAV194',no:'194',nom:'A194',addr:'101 rue saint Léonard',zone:'ALM - Noyers',gps:'47.4633,-0.5371',rem:'Point double'},
+  {id:'PAV195',no:'195',nom:'A195',addr:'101 rue saint Léonard',zone:'ALM - Noyers',gps:'47.4633,-0.5371',rem:'Point double'},
+  {id:'PAV307',no:'307',nom:'A307',addr:'31 rue Edison',zone:'ALM - Noyers',gps:'47.4623,-0.5329'},
+  {id:'PAV001',no:'1',nom:'A011',addr:'Place du lycée',zone:'ALM - Place du Lycée',gps:'47.4672,-0.5447',rem:'Point double'},
+  {id:'PAV004',no:'4',nom:'A012',addr:'41 Rue de Belgique',zone:'ALM - Place du Lycée',gps:'47.4695,-0.5427'},
+  {id:'PAV005',no:'5',nom:'A013',addr:'1 Rue Proust',zone:'ALM - Place du Lycée',gps:'47.4686,-0.5411'},
+  {id:'PAV006',no:'6',nom:'A014',addr:'passage Mulot',zone:'ALM - Place du Lycée',gps:'47.4682,-0.5401'},
+  {id:'PAV009',no:'9',nom:'A015',addr:'Rue Franklin',zone:'ALM - Place du Lycée',gps:'47.4671,-0.5388'},
+  {id:'PAV011',no:'11',nom:'A016',addr:'Rue Franklin',zone:'ALM - Place du Lycée',gps:'47.4671,-0.5423'},
+  {id:'PAV016',no:'16',nom:'A017',addr:'Rue Bressigny',zone:'ALM - Place du Lycée',gps:'47.4660,-0.5469'},
+  {id:'PAV017',no:'17',nom:'A018',addr:'16 Rue Marie Place',zone:'ALM - Place du Lycée',gps:'47.4673,-0.5469',rem:'Point double'},
+  {id:'PAV008',no:'8',nom:'A019',addr:'1Rue Joachim Bellay',zone:'ALM - Place du Lycée',gps:'47.4662,-0.5359'},
+  {id:'PAV007',no:'7',nom:'A020',addr:"square Jeanne d'Arc",zone:'ALM - Place du Lycée',gps:'47.4671,-0.5365'},
+  {id:'PAV019',no:'19',nom:'A021',addr:'place du lycée',zone:'ALM - Place du Lycée',gps:'47.4672,-0.5447',rem:'Point double'},
+  {id:'PAV012',no:'12',nom:'A022',addr:'rue Joachim du Bellay',zone:'ALM - Place du Lycée',gps:'47.4663,-0.5407'},
+  {id:'PAV010',no:'10',nom:'A023',addr:'65 Rue Franklin',zone:'ALM - Place du Lycée',gps:'47.4671,-0.5408',rem:'Point double'},
+  {id:'PAV002',no:'2',nom:'A024',addr:'Rue Prebaudelle',zone:'ALM - Place du Lycée',gps:'47.4681,-0.5440'},
+  {id:'PAV003',no:'3',nom:'A025',addr:"Avenue Jeanne D'arc",zone:'ALM - Place du Lycée',gps:'47.4693,-0.5446'},
+  {id:'PAV013',no:'13',nom:'A026',addr:'rue Célestin port',zone:'ALM - Place du Lycée',gps:'47.4658,-0.5429'},
+  {id:'PAV014',no:'14',nom:'A027',addr:'2 Rue de la Madeleine',zone:'ALM - Place du Lycée',gps:'47.4653,-0.5454',rem:'Point double'},
+  {id:'PAV015',no:'15',nom:'A028',addr:'place André Leroy',zone:'ALM - Place du Lycée',gps:'47.4649,-0.5486'},
+  {id:'PAV018',no:'18',nom:'A029',addr:'32 rue Ménage',zone:'ALM - Place du Lycée',gps:'47.4689,-0.5459'},
+  {id:'PAV127',no:'127',nom:'A127',addr:'16 Rue Marie Place',zone:'ALM - Place du Lycée',gps:'47.4673,-0.5469',rem:'Point double'},
+  {id:'PAV291',no:'291',nom:'A291',addr:'2 rue de la Madeleine',zone:'ALM - Place du Lycée',gps:'47.4653,-0.5454',rem:'Point double'},
+  {id:'PAV292',no:'292',nom:'A292',addr:'65 Rue Franklin',zone:'ALM - Place du Lycée',gps:'47.4671,-0.5408',rem:'Point double'},
+  {id:'PAV321',no:'321',nom:'A321',addr:'Rue Marie Place',zone:'ALM - Place du Lycée',gps:'47.4674,-0.5457'},
+  {id:'PAV084',no:'84',nom:'A084',addr:'Place Herault',zone:'ALM - Ralliement',gps:'47.475,-0.5495',rem:'Point double'},
+  {id:'PAV085',no:'85',nom:'A085',addr:'Place Herault',zone:'ALM - Ralliement',gps:'47.475,-0.5495',rem:'Point double'},
+  {id:'PAV086',no:'86',nom:'A086',addr:'6 Place Imbach',zone:'ALM - Ralliement',gps:'47.4740,-0.5483'},
+  {id:'PAV087',no:'87',nom:'A087',addr:'Place Imbach',zone:'ALM - Ralliement',gps:'47.4732,-0.5483',rem:'Point double'},
+  {id:'PAV088',no:'88',nom:'A088',addr:'Place Imbach',zone:'ALM - Ralliement',gps:'47.4732,-0.5483',rem:'Point double'},
+  {id:'PAV089',no:'89',nom:'A089',addr:'22 Place Imbach',zone:'ALM - Ralliement',gps:'47.4734,-0.5469',rem:'Point double'},
+  {id:'PAV090',no:'90',nom:'A090',addr:'22 Place Imbach',zone:'ALM - Ralliement',gps:'47.4734,-0.5469',rem:'Point double'},
+  {id:'PAV091',no:'91',nom:'A091',addr:'1 rue Bodinier',zone:'ALM - Ralliement',gps:'47.4728,-0.5521'},
+  {id:'PAV092',no:'92',nom:'A092',addr:'1 rue des Cordeliers',zone:'ALM - Ralliement',gps:'47.4723,-0.5508'},
+  {id:'PAV093',no:'93',nom:'A093',addr:'1 rue des Cordeliers',zone:'ALM - Ralliement',gps:'47.4723,-0.5508'},
+  {id:'PAV094',no:'94',nom:'A094',addr:'83 rue du Mail',zone:'ALM - Ralliement',gps:'47.4718,-0.5480'},
+  {id:'PAV095',no:'95',nom:'A095',addr:'71 rue Plantagenet',zone:'ALM - Ralliement',gps:'47.4713,-0.5535'},
+  {id:'PAV096',no:'96',nom:'A096',addr:'Place du Ralliement',zone:'ALM - Ralliement',gps:'47.4710,-0.5527',rem:'Point double'},
+  {id:'PAV097',no:'97',nom:'A097',addr:'Place du Ralliement',zone:'ALM - Ralliement',gps:'47.4710,-0.5527',rem:'Point double'},
+  {id:'PAV098',no:'98',nom:'A098',addr:'Rue Sainte Maurille',zone:'ALM - Ralliement',gps:'47.4710,-0.5501'},
+  {id:'PAV099',no:'99',nom:'A099',addr:'Rue Chevreuil',zone:'ALM - Ralliement',gps:'47.4714,-0.5495',rem:'Point double'},
+  {id:'PAV100',no:'100',nom:'A100',addr:'Rue Saint Blaise',zone:'ALM - Ralliement',gps:'47.4696,-0.5503'},
+  {id:'PAV101',no:'101',nom:'A101',addr:'Rue Chevreuil',zone:'ALM - Ralliement',gps:'47.4714,-0.5495',rem:'Point double'},
+  {id:'PAV114',no:'114',nom:'A114',addr:'Boulevard Saint Michel',zone:'ALM - Saint Michel',gps:'47.4735,-0.5435',rem:'Point double'},
+  {id:'PAV115',no:'115',nom:'A115',addr:'Boulevard Saint Michel',zone:'ALM - Saint Michel',gps:'47.4735,-0.5435',rem:'Point double'},
+  {id:'PAV116',no:'116',nom:'A116',addr:'Avenue Pasteur',zone:'ALM - Saint Michel',gps:'47.4729,-0.5397',rem:'Point double'},
+  {id:'PAV117',no:'117',nom:'A117',addr:'Avenue Pasteur',zone:'ALM - Saint Michel',gps:'47.4729,-0.5397',rem:'Point double'},
+  {id:'PAV118',no:'118',nom:'A118',addr:'Boulevard Saint Michel',zone:'ALM - Saint Michel',gps:'47.4737,-0.5396'},
+  {id:'PAV119',no:'119',nom:'A119',addr:'Avenue Pasteur',zone:'ALM - Saint Michel',gps:'47.4750,-0.5354'},
+  {id:'PAV120',no:'120',nom:'A120',addr:'Rue de Belfort',zone:'ALM - Saint Michel',gps:'47.4765,-0.5381'},
+  {id:'PAV121',no:'121',nom:'A121',addr:'Rue de Belfort',zone:'ALM - Saint Michel',gps:'47.4774,-0.5392'},
+  {id:'PAV122',no:'122',nom:'A122',addr:'Rue du Pré Pigeon',zone:'ALM - Saint Michel',gps:'47.4764,-0.5393'},
+  {id:'PAV123',no:'123',nom:'A123',addr:'Rue Viola Farber',zone:'ALM - Saint Michel',gps:'47.4748,-0.5375'},
+  {id:'PAV124',no:'124',nom:'A124',addr:'Rue Lardin de Musset',zone:'ALM - Saint Michel',gps:'47.4744,-0.5388'},
+  {id:'PAV125',no:'125',nom:'A125',addr:'Rue Lardin de Musset',zone:'ALM - Saint Michel',gps:'47.4760,-0.5403'},
+  {id:'PAV126',no:'126',nom:'A126',addr:'Place Olivier Giran',zone:'ALM - Saint Michel',gps:'47.4742,-0.5414'},
+  {id:'PAV309',no:'309',nom:'A309',addr:'71 rue du Pré Pigeon',zone:'ALM - Saint Michel',gps:'47.4758,-0.5375'},
+  {id:'PAV250',no:'250',nom:'A250',addr:'Boulevard Yvonne Poirel',zone:'ALM - Vauban',gps:'47.4613,-0.5619'},
+  {id:'PAV251',no:'251',nom:'A251',addr:'Rue Votier',zone:'ALM - Vauban',gps:'47.4603,-0.5617'},
+  {id:'PAV252',no:'252',nom:'A252',addr:'2 Rue Votier',zone:'ALM - Vauban',gps:'47.4610,-0.5634'},
+  {id:'PAV253',no:'253',nom:'A253',addr:'107 Rue Eblé X Rue Brosseau',zone:'ALM - Vauban',gps:'47.4588,-0.5632'},
+  {id:'PAV254',no:'254',nom:'A254',addr:'Avenue Vauban',zone:'ALM - Vauban',gps:'47.4590,-0.5611'},
+  {id:'PAV255',no:'255',nom:'A255',addr:'113 Rue de Frémur',zone:'ALM - Vauban',gps:'47.4569,-0.5600'},
+  {id:'PAV256',no:'256',nom:'A256',addr:'152 Rue de Frémur',zone:'ALM - Vauban',gps:'47.4551,-0.5629'},
+  {id:'PAV257',no:'257',nom:'A257',addr:'162 rue Eblé',zone:'ALM - Vauban',gps:'47.4549,-0.5667'},
+  {id:'PAV258',no:'258',nom:'A258',addr:'161 Rue Eblé',zone:'ALM - Vauban',gps:'47.4565,-0.5651'},
+  {id:'PAV163',no:'163',nom:'A163',addr:'Rue Saumuroise',zone:'ALM - Villoutreys',gps:'47.4573,-0.5324'},
+  {id:'PAV167',no:'167',nom:'A167',addr:'39 Rue Volney',zone:'ALM - Volney',gps:'47.4633,-0.5453'},
+  {id:'PAV168',no:'168',nom:'A168',addr:'63 Rue Volney',zone:'ALM - Volney',gps:'47.4626,-0.5433',rem:'Point double'},
+  {id:'PAV169',no:'169',nom:'A169',addr:'63 Rue Volney',zone:'ALM - Volney',gps:'47.4626,-0.5433',rem:'Point double'},
+  {id:'PAV170',no:'170',nom:'A170',addr:'83 Rue Volney',zone:'ALM - Volney',gps:'47.4618,-0.5414'},
+  {id:'PAV171',no:'171',nom:'A171',addr:'137 Rue Volney',zone:'ALM - Volney',gps:'47.4613,-0.5402'},
+  {id:'PAV172',no:'172',nom:'A172',addr:'27 rue Merlet de Laboulaye',zone:'ALM - Volney',gps:'47.4613,-0.5464',rem:'Point double'},
+  {id:'PAV173',no:'173',nom:'A173',addr:'1 rue Merlet de Laboulaye',zone:'ALM - Volney',gps:'47.4621,-0.5452'},
+  {id:'PAV174',no:'174',nom:'A174',addr:'21 rue Chèvre',zone:'ALM - Volney',gps:'47.4615,-0.5443'},
+  {id:'PAV175',no:'175',nom:'A175',addr:'21 rue Chèvre',zone:'ALM - Volney',gps:'47.4605,-0.5430'},
+  {id:'PAV176',no:'176',nom:'A176',addr:'72 rue de la Madeleine',zone:'ALM - Volney',gps:'47.4637,-0.5418',rem:'Point double'},
+  {id:'PAV177',no:'177',nom:'A177',addr:'72 rue de la Madeleine',zone:'ALM - Volney',gps:'47.4637,-0.5418',rem:'Point double'},
+  {id:'PAV178',no:'178',nom:'A178',addr:'39 rue Bourgonnier',zone:'ALM - Volney',gps:'47.4625,-0.5404'},
+  {id:'PAV179',no:'179',nom:'A179',addr:'26 rue des Lilas',zone:'ALM - Volney',gps:'47.4643,-0.5395'},
+  {id:'PAV180',no:'180',nom:'A180',addr:'12 rue Saint Léonard',zone:'ALM - Volney',gps:'47.4652,-0.5418'},
+  {id:'PAV322',no:'322',nom:'A322',addr:'Rue volney',zone:'ALM - Volney',gps:'47.4639,-0.5465'},
+  {id:'PAV072',no:'72',nom:'A072',addr:'81 rue des Banchais',zone:'ALM - Voltaire Daguenet',gps:'47.4761,-0.5305'},
+  {id:'PAV073',no:'73',nom:'A073',addr:'Place Freppel',zone:'ALM - Voltaire Daguenet',gps:'47.4702,-0.5552'},
+  {id:'PAV074',no:'74',nom:'A074',addr:'Place Sainte Croix',zone:'ALM - Voltaire Daguenet',gps:'47.4702,-0.5542'},
+  {id:'PAV075',no:'75',nom:'A075',addr:'Rue Toussaint',zone:'ALM - Voltaire Daguenet',gps:'47.4696,-0.5557'},
+  {id:'PAV076',no:'76',nom:'A076',addr:'Place saint Eloi',zone:'ALM - Voltaire Daguenet',gps:'47.4690,-0.5537',rem:'Point double'},
+  {id:'PAV077',no:'77',nom:'A077',addr:'Place Saint Eloi',zone:'ALM - Voltaire Daguenet',gps:'47.4690,-0.5537',rem:'Point double'},
+  {id:'PAV078',no:'78',nom:'A078',addr:'Rue Saint Martin',zone:'ALM - Voltaire Daguenet',gps:'47.4694,-0.5524'},
+  {id:'PAV079',no:'79',nom:'A079',addr:'Boulevard Foch',zone:'ALM - Voltaire Daguenet',gps:'47.4691,-0.5498'},
+  {id:'PAV080',no:'80',nom:'A080',addr:'Boulevard Foch',zone:'ALM - Voltaire Daguenet',gps:'47.4680,-0.5512'},
+  {id:'PAV081',no:'81',nom:'A081',addr:'Boulevard du Roi René',zone:'ALM - Voltaire Daguenet',gps:'47.4675,-0.5556'},
+  {id:'PAV082',no:'82',nom:'A082',addr:'Boulevard du Roi René',zone:'ALM - Voltaire Daguenet',gps:'47.4681,-0.5576'},
+  {id:'PAV083',no:'83',nom:'A083',addr:'Rue Edouard Branly',zone:'ALM - Voltaire Daguenet',gps:'47.4748,-0.5305'},
+  {id:'PAV310',no:'310',nom:'A310',addr:'1 Boulevard du Bon Pasteur',zone:"ALM - Yolande d'Aragon",gps:'47.4700,-0.5688'},
+];
+
+/* ══════════════════════════════════════════════
+   TÂCHES PRÉDÉFINIES
+══════════════════════════════════════════════ */
+const TACHES=[
+  {id:'sticker_blanc',label:'Stickers blanc sur la poignée capo'},
+  {id:'sticker_a5',label:'Sticker A5 sur le toit'},
+  {id:'poignee_pmr',label:'Installation poignée PMR blanche'},
+  {id:'nettoyage',label:'Nettoyage général de l\'abri'},
+];
+
+/* ══════════════════════════════════════════════
+   CONFIG
+══════════════════════════════════════════════ */
+const ADMIN_PWD='alm2025';
+const LS_KEY='alm_rapports';
+const LS_TOURNEES='alm_tournees';
+const LS_USERS='alm_users';
+
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+const S={
+  view:'login',
+  operateur:'',
+  isAdmin:false,
+  pavId:null,
+  rapports:[],
+  tournees:[],
+  users:[],
+  form:null,
+  search:'',
+  rid:null,
+  tid:null,
+  adminTab:'rapports',
+  tourneeForm:null,
+  tourneeSearch:'',
+  adminFiltre:'tous',
+  exportSel:new Set(),
+  exportDateFrom:'',
+  exportDateTo:'',
+  pendingTachesCallback:null,
+};
+
+/* ══════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════ */
+const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const now=()=>new Date();
+const fdt=d=>{
+  if(!d)return '';
+  const dt=new Date(d);
+  return dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'})+
+    ' '+dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+};
+const getPav=id=>PAVS.find(p=>p.id===id);
+const getRapport=id=>S.rapports.find(r=>r.id===id);
+const lastRapport=pavId=>S.rapports.filter(r=>r.pavId===pavId).sort((a,b)=>b.createdAt-a.createdAt)[0]||null;
+
+function loadRapports(){
+  try{const d=localStorage.getItem(LS_KEY);S.rapports=d?JSON.parse(d):[];}catch{S.rapports=[];}
+}
+function saveRapports(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify(S.rapports));}catch{}
+}
+function loadTournees(){
+  try{const d=localStorage.getItem(LS_TOURNEES);S.tournees=d?JSON.parse(d):[];}catch{S.tournees=[];}
+}
+function saveTournees(){
+  try{localStorage.setItem(LS_TOURNEES,JSON.stringify(S.tournees));}catch{}
+}
+function loadUsers(){
+  try{const d=localStorage.getItem(LS_USERS);S.users=d?JSON.parse(d):[];}catch{S.users=[];}
+}
+function saveUsers(){
+  try{localStorage.setItem(LS_USERS,JSON.stringify(S.users));}catch{}
+}
+const getTournee=id=>S.tournees.find(t=>t.id===id);
+const todayStr=()=>new Date().toISOString().slice(0,10);
+/* Tournée du jour pour un opérateur donné (insensible à la casse) */
+const tourneeJour=nom=>S.tournees.find(t=>
+  t.date===todayStr()&&t.operateur.toLowerCase()===nom.toLowerCase()
+)||null;
+
+/* ══════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════ */
+function go(view,extra={}){
+  Object.assign(S,extra,{view});
+  draw();
+  window.scrollTo(0,0);
+}
+
+function draw(){
+  const el=document.getElementById('app');
+  const views={login:vLogin,home:vHome,form:vForm,detail:vDetail,admin:vAdmin,'tournee-edit':vTourneeEdit,'suivi-tournee':vSuiviTournee};
+  el.innerHTML=(views[S.view]||vLogin)();
+  afterDraw();
+}
+
+/* ══════════════════════════════════════════════
+   VUE : LOGIN
+══════════════════════════════════════════════ */
+function vLogin(){
+  const usersOpts=S.users.map(u=>`<option value="${esc(u.id)}">${esc(u.nom)}${u.admin?' (Admin)':''}</option>`).join('');
+  return `
+  <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:var(--bl)">
+    <div style="width:100%;max-width:360px">
+      <div style="text-align:center;margin-bottom:32px">
+        <div style="font-size:44px;margin-bottom:10px">🗑</div>
+        <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:.01em">Maintenance ALM</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:4px">Abris Bac — Angers Loire Métropole</div>
+      </div>
+      <div style="background:rgba(255,255,255,.08);border-radius:16px;padding:24px">
+        ${S.users.length>0?`
+          <div class="field" style="margin-bottom:16px">
+            <label style="color:rgba(255,255,255,.7)">Qui êtes-vous ?</label>
+            <select id="login-user" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:#fff;font-size:15px;padding:10px 13px;width:100%;border-radius:9px;-webkit-appearance:none;appearance:none">
+              <option value="">— Sélectionner —</option>
+              ${usersOpts}
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:20px">
+            <label style="color:rgba(255,255,255,.7)">Mot de passe</label>
+            <input id="login-pwd" type="password" placeholder="••••••" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:#fff">
+          </div>
+          <button class="btn btn-or btn-f" style="font-size:16px;padding:14px" onclick="doLogin()">Accéder →</button>
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.15)">
+            <details>
+              <summary style="color:rgba(255,255,255,.5);font-size:12px;cursor:pointer;list-style:none">⚙ Accès administrateur</summary>
+              <div style="margin-top:12px">
+                <input id="login-code" type="password" placeholder="Code admin" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;padding:10px 13px;border-radius:9px;width:100%;font-size:14px;margin-bottom:8px">
+                <button class="btn btn-f" style="background:rgba(255,255,255,.15);color:#fff;border:none;font-size:13px;padding:10px" onclick="doLoginAdmin()">Accès admin</button>
+              </div>
+            </details>
+          </div>
+        `:`
+          <div style="color:rgba(255,255,255,.7);font-size:14px;text-align:center;margin-bottom:16px">
+            Aucun utilisateur configuré.<br>Connectez-vous en admin pour en créer.
+          </div>
+          <div class="field" style="margin-bottom:16px">
+            <label style="color:rgba(255,255,255,.7)">Code admin</label>
+            <input id="login-code" type="password" placeholder="••••••" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:#fff">
+          </div>
+          <button class="btn btn-or btn-f" style="font-size:16px;padding:14px" onclick="doLoginAdmin()">Accéder →</button>
+        `}
+      </div>
+    </div>
+  </div>`;
+}
+
+function doLoginAdmin(){
+  const code=(document.getElementById('login-code')?.value||'').trim();
+  if(code!==ADMIN_PWD){toast('Code incorrect','#C0392B');return;}
+  S.operateur='Administrateur';
+  S.isAdmin=true;
+  go('home');
+}
+
+function doLogin(){
+  const uid=document.getElementById('login-user')?.value||'';
+  const pwd=(document.getElementById('login-pwd')?.value||'').trim();
+  if(!uid){toast('Sélectionnez votre nom','#C0392B');return;}
+  const u=S.users.find(u=>u.id===uid);
+  if(!u)return;
+  if(u.pwd&&pwd!==u.pwd){toast('Mot de passe incorrect','#C0392B');return;}
+  if(u.pwd&&!pwd){toast('Saisissez votre mot de passe','#C0392B');return;}
+  S.operateur=u.nom;
+  S.isAdmin=u.admin||false;
+  go('home');
+}
+
+/* ══════════════════════════════════════════════
+   VUE : HOME — Liste PAV
+══════════════════════════════════════════════ */
+function vHome(){
+  const q=S.search.toLowerCase();
+  const tj=tourneeJour(S.operateur);
+  const tjPavIds=tj?new Set(tj.pavIds):new Set();
+
+  const filtered=PAVS.filter(p=>
+    !q||p.nom.toLowerCase().includes(q)||p.no.includes(q)||
+    p.addr.toLowerCase().includes(q)||p.zone.toLowerCase().includes(q)
+  );
+  const done=S.rapports.map(r=>r.pavId);
+  const nbDone=new Set(done).size;
+
+  const pavCard=(p,highlight=false)=>{
+    const lr=lastRapport(p.id);
+    const dot=!lr?'dot-none':lr.statut==='ok'?'dot-ok':'dot-nok';
+    const nonTermine=lr&&lr.complet===false;
+    const border=highlight?'border:2px solid var(--blm);':'';
+    const action=lr?'voir-rpt-pav':'go-pav';
+    const dataId=lr?`data-rid="${lr.id}"`:`data-pid="${p.id}"`;
+    return `<div class="pav" data-a="${action}" ${dataId} style="${border}">
+      <div class="pav-badge" style="${highlight?'background:var(--bl);':''}">
+        <span style="${highlight?'color:rgba(255,255,255,.7)':''}">PAV</span>
+        <span style="${highlight?'color:#fff':''}">${esc(p.no)}</span>
+      </div>
+      <div class="pav-info">
+        <div class="pav-name">${esc(p.nom)}</div>
+        <div class="pav-addr">${esc(p.addr)}</div>
+        <div class="pav-meta">
+          ${p.rem?`<span class="badge b-bl">${esc(p.rem)}</span>`:''}
+          ${lr&&!nonTermine?`<span class="badge b-ok">✓ ${new Date(lr.createdAt).toLocaleDateString('fr-FR')}</span>`:''}
+          ${nonTermine?`<span class="badge b-or">⚠ Non terminé</span>`:''}
+        </div>
+      </div>
+      <div class="pav-right">
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${p.gps}" target="_blank" rel="noopener" class="gps-link" onclick="event.stopPropagation()">🗺️</a>
+        <div class="${dot}"></div>
+      </div>
+    </div>`;
+  };
+
+  /* Bloc tournée du jour */
+  let tourneeHtml='';
+  if(tj&&tjPavIds.size>0&&!q){
+    const tjPavs=tj.pavIds.map(id=>PAVS.find(p=>p.id===id)).filter(Boolean);
+    const tjDone=tjPavs.filter(p=>lastRapport(p.id)).length;
+    tourneeHtml=`
+    <div style="background:var(--bl);border-radius:var(--radius);padding:14px;margin-bottom:16px;color:#fff">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div>
+          <div style="font-size:13px;font-weight:700;opacity:.75;text-transform:uppercase;letter-spacing:.05em">Ma tournée du jour</div>
+          <div style="font-size:11px;opacity:.6;margin-top:2px">${tj.date.split('-').reverse().join('/')}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:22px;font-weight:800">${tjDone}/${tjPavs.length}</div>
+          <div style="font-size:11px;opacity:.7">effectués</div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.15);border-radius:6px;height:6px;margin-bottom:12px">
+        <div style="background:#fff;height:6px;border-radius:6px;width:${Math.round(tjDone/tjPavs.length*100)}%"></div>
+      </div>
+      ${tjPavs.map(p=>pavCard(p,true)).join('')}
+    </div>`;
+  }
+
+  /* Reste des PAV (hors tournée si pas de recherche) */
+  const restFiltered=q?filtered:filtered.filter(p=>!tjPavIds.has(p.id));
+  const zones={};
+  restFiltered.forEach(p=>{
+    if(!zones[p.zone])zones[p.zone]=[];
+    zones[p.zone].push(p);
+  });
+  const zonesHtml=Object.entries(zones).sort(([a],[b])=>a.localeCompare(b)).map(([z,pavs])=>`
+    <div class="zone-hdr">${esc(z.replace('ALM - ',''))} <span style="font-weight:400;color:var(--muted)">${pavs.length}</span></div>
+    ${pavs.map(p=>pavCard(p,false)).join('')}
+  `).join('');
+
+  return `
+  <div class="hdr">
+    <div style="flex:1;min-width:0">
+      <div class="hdr-title">🗑 Maintenance ALM</div>
+      <div class="hdr-sub">${esc(S.operateur)}${S.isAdmin?' · Admin':''}${tj?' · Tournée assignée':''}</div>
+    </div>
+    ${S.isAdmin?`<button class="hdr-btn or" data-a="go-admin">Rapports</button>`:''}
+    <button class="hdr-btn" data-a="logout" style="background:rgba(255,255,255,.1)">⏻</button>
+  </div>
+  <div class="pg">
+    <div class="stats">
+      <div class="stat"><div class="stat-n">${tj?tj.pavIds.length:PAVS.length}</div><div class="stat-l">${tj?'Ma tournée':'Points'}</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--gr)">${nbDone}</div><div class="stat-l">Visités</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--or)">${(tj?tj.pavIds.length:PAVS.length)-nbDone}</div><div class="stat-l">Restants</div></div>
+    </div>
+    <div class="search-wrap">
+      <input type="search" id="search-in" placeholder="Rechercher PAV, adresse, zone…" value="${esc(S.search)}">
+    </div>
+    ${tourneeHtml}
+    ${restFiltered.length===0&&!tourneeHtml?`<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Aucun résultat</div></div>`:zonesHtml}
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   VUE : FORMULAIRE
+══════════════════════════════════════════════ */
+function mkForm(pavId){
+  const taches={};
+  TACHES.forEach(t=>{taches[t.id]={fait:false,statut:'na'};});
+  return {id:uid(),pavId,operateur:S.operateur,taches,tachesLibres:'',remarques:'',commentaire:'',photos:[],signature:null,nomSignataire:S.operateur,statut:'ok',createdAt:null};
+}
+
+function vForm(){
+  const pav=getPav(S.pavId);
+  if(!pav)return vHome();
+  const f=S.form;
+
+  const photosHtml=(f.photos||[]).map((src,i)=>`
+    <div class="ph-wrap">
+      <img src="${src}" class="ph-img" data-a="zoom-ph" data-src="${src}" alt="photo ${i+1}">
+      <button class="ph-del" data-a="del-ph" data-idx="${i}">×</button>
+    </div>`).join('');
+
+  const tachesHtml=TACHES.map(t=>{
+    const tv=f.taches[t.id]||{fait:false,statut:'na'};
+    return `<div class="task-row">
+      <input type="checkbox" id="tk-${t.id}" data-a="tk-check" data-tid="${t.id}"${tv.fait?' checked':''}>
+      <label for="tk-${t.id}">${esc(t.label)}</label>
+      <select data-a="tk-sta" data-tid="${t.id}" style="border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:12px;background:var(--card);color:var(--text)">
+        <option value="ok"${tv.statut==='ok'?' selected':''}>✓ Fait</option>
+        <option value="ko"${tv.statut==='ko'?' selected':''}>✗ Non fait</option>
+        <option value="na"${tv.statut==='na'?' selected':''}>— N/A</option>
+      </select>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="hdr">
+    <button class="hdr-back" data-a="back">←</button>
+    <div style="flex:1;min-width:0">
+      <div class="hdr-title">${esc(pav.nom)} — PAV ${esc(pav.no)}</div>
+      <div class="hdr-sub">${esc(pav.addr)}</div>
+    </div>
+    <a href="https://www.google.com/maps/dir/?api=1&destination=${pav.gps}" target="_blank" rel="noopener" class="hdr-btn" style="font-size:18px;text-decoration:none">🗺️</a>
+  </div>
+  <div class="pg">
+    <div class="card">
+      <div class="card-title">Informations point</div>
+      <div class="dr"><span class="dl">N° PAV Plan</span><span class="dv">${esc(pav.no)}</span></div>
+      <div class="dr"><span class="dl">Nom borne</span><span class="dv">${esc(pav.nom)}</span></div>
+      <div class="dr"><span class="dl">Adresse</span><span class="dv">${esc(pav.addr)}</span></div>
+      <div class="dr"><span class="dl">Zone</span><span class="dv">${esc(pav.zone)}</span></div>
+      <div class="dr"><span class="dl">GPS</span><span class="dv">${esc(pav.gps)}</span></div>
+      ${pav.rem?`<div class="dr"><span class="dl">Remarque</span><span class="dv"><span class="badge b-bl">${esc(pav.rem)}</span></span></div>`:''}
+    </div>
+
+    <div class="card">
+      <div class="card-title">📷 Photos <span style="color:var(--rd);font-size:11px;font-weight:400">(obligatoire)</span></div>
+      <div class="ph-grid" id="ph-grid">
+        ${photosHtml}
+        <div class="ph-add" data-a="add-ph"><div class="ph-add-icon">📷</div><span>Ajouter</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Tâches à effectuer <span style="color:var(--rd);font-size:11px;font-weight:400">*</span></div>
+      ${tachesHtml}
+      <div class="field" style="margin-top:12px">
+        <label>Tâches supplémentaires / libres</label>
+        <textarea id="f-taches-libres" placeholder="Décrire toute autre opération effectuée…">${esc(f.tachesLibres)}</textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Remarques et consignes</div>
+      <div class="field">
+        <textarea id="f-remarques" placeholder="Remarques complémentaires, consignes…">${esc(f.remarques)}</textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Commentaire général</div>
+      <div class="field">
+        <textarea id="f-commentaire" placeholder="Commentaire général sur l'intervention…">${esc(f.commentaire)}</textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Statut global</div>
+      <div style="display:flex;gap:10px">
+        <label style="flex:1;display:flex;align-items:center;gap:8px;padding:12px;border:2px solid ${f.statut==='ok'?'var(--gr)':'var(--border)'};border-radius:10px;cursor:pointer;background:${f.statut==='ok'?'var(--grl)':'var(--card)'}">
+          <input type="radio" name="statut" value="ok"${f.statut==='ok'?' checked':''} data-a="statut" style="accent-color:var(--gr)">
+          <span style="font-weight:600;color:var(--gr)">✓ Conforme</span>
+        </label>
+        <label style="flex:1;display:flex;align-items:center;gap:8px;padding:12px;border:2px solid ${f.statut==='ko'?'var(--or)':'var(--border)'};border-radius:10px;cursor:pointer;background:${f.statut==='ko'?'var(--orl)':'var(--card)'}">
+          <input type="radio" name="statut" value="ko"${f.statut==='ko'?' checked':''} data-a="statut" style="accent-color:var(--or)">
+          <span style="font-weight:600;color:var(--or)">⚠ Non conforme</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Signature intervenant <span style="color:var(--rd);font-size:11px;font-weight:400">(obligatoire)</span></div>
+      <div class="field">
+        <label>Nom signataire</label>
+        <input type="text" id="f-signataire" value="${esc(f.nomSignataire)}" placeholder="Prénom Nom">
+      </div>
+      <div style="margin-bottom:8px;font-size:13px;font-weight:600;color:var(--muted)">Signer ici ↓</div>
+      <div class="sig-wrap">
+        <canvas id="sig-canvas" width="900" height="280"></canvas>
+      </div>
+      <div class="sig-actions">
+        <button class="btn btn-sm" data-a="clear-sig">✕ Effacer</button>
+        ${f.signature?`<span style="font-size:12px;color:var(--gr);align-self:center">✓ Signature enregistrée</span>`:''}
+      </div>
+      ${f.signature?`<div style="margin-top:10px"><img src="${f.signature}" style="width:100%;border-radius:8px;border:1px solid var(--border)"></div>`:''}
+    </div>
+
+    <button class="btn btn-p btn-f" data-a="save-form" style="font-size:16px;padding:14px">💾 Enregistrer l'intervention</button>
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   VUE : DETAIL RAPPORT
+══════════════════════════════════════════════ */
+function vDetail(){
+  const r=getRapport(S.rid);
+  if(!r)return go('home');
+  const pav=getPav(r.pavId);
+
+  const tachesHtml=TACHES.filter(t=>r.taches[t.id]&&r.taches[t.id].fait).map(t=>{
+    const v=r.taches[t.id];
+    const cls=v.statut==='ok'?'sta-ok':v.statut==='ko'?'sta-ko':'sta-na';
+    const lbl=v.statut==='ok'?'Fait':v.statut==='ko'?'Non fait':'N/A';
+    return `<div class="task-row" style="cursor:default">
+      <span style="font-size:18px">${v.statut==='ok'?'✓':'✗'}</span>
+      <span style="flex:1;font-size:14px">${esc(t.label)}</span>
+      <span class="task-sta ${cls}">${lbl}</span>
+    </div>`;
+  }).join('');
+
+  const photosHtml=(r.photos||[]).map((src,i)=>`
+    <img src="${src}" class="ph-img" data-a="zoom-ph" data-src="${src}" alt="photo ${i+1}" style="cursor:zoom-in">`).join('');
+
+  return `
+  <div class="hdr">
+    <button class="hdr-back" data-a="back">←</button>
+    <div style="flex:1;min-width:0">
+      <div class="hdr-title">Rapport — ${esc(pav?.nom||r.pavId)}</div>
+      <div class="hdr-sub">${fdt(r.createdAt)}</div>
+    </div>
+    ${S.isAdmin?`<button class="hdr-btn or" data-a="export-rpt">📥 Export</button>`:''}
+  </div>
+  <div class="pg">
+    <div class="card">
+      <div class="card-title">Identification</div>
+      <div class="dr"><span class="dl">N° PAV Plan</span><span class="dv">${esc(pav?.no||'')}</span></div>
+      <div class="dr"><span class="dl">Nom borne</span><span class="dv">${esc(pav?.nom||'')}</span></div>
+      <div class="dr"><span class="dl">Adresse</span><span class="dv">${esc(pav?.addr||'')}</span></div>
+      <div class="dr"><span class="dl">GPS</span><span class="dv">${esc(pav?.gps||'')}</span></div>
+      <div class="dr"><span class="dl">Opérateur</span><span class="dv">${esc(r.operateur)}</span></div>
+      <div class="dr"><span class="dl">Date / heure</span><span class="dv">${fdt(r.createdAt)}</span></div>
+      <div class="dr"><span class="dl">Statut</span><span class="dv"><span class="badge ${r.statut==='ok'?'b-ok':'b-or'}">${r.statut==='ok'?'✓ Conforme':'⚠ Non conforme'}</span></span></div>
+      ${r.complet===false?`<div class="dr"><span class="dl">Avancement</span><span class="dv"><span class="badge b-or">⚠ Non terminé</span></span></div>`:''}
+    </div>
+    ${photosHtml?`<div class="card"><div class="card-title">📷 Photos</div><div class="ph-grid">${photosHtml}</div></div>`:''}
+    ${tachesHtml?`<div class="card"><div class="card-title">Tâches effectuées</div>${tachesHtml}</div>`:''}
+    ${r.tachesLibres?`<div class="card"><div class="card-title">Tâches libres</div><p style="font-size:14px;line-height:1.6">${esc(r.tachesLibres)}</p></div>`:''}
+    ${r.remarques?`<div class="card"><div class="card-title">Remarques</div><p style="font-size:14px;line-height:1.6">${esc(r.remarques)}</p></div>`:''}
+    ${r.commentaire?`<div class="card"><div class="card-title">Commentaire général</div><p style="font-size:14px;line-height:1.6">${esc(r.commentaire)}</p></div>`:''}
+    <div class="card">
+      <div class="card-title">Signature</div>
+      <div class="dr"><span class="dl">Signataire</span><span class="dv">${esc(r.nomSignataire||r.operateur)}</span></div>
+      ${r.signature?`<img src="${r.signature}" style="width:100%;border-radius:8px;border:1px solid var(--border);margin-top:10px">`:'<p style="color:var(--muted);font-size:13px;margin-top:8px">Aucune signature</p>'}
+    </div>
+    ${S.isAdmin?`
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-p btn-f" data-a="modifier-rapport">✏️ Modifier ce rapport</button>
+      <div id="del-z" style="flex:1"><button class="btn btn-d btn-f" data-a="ask-del-rpt">🗑 Supprimer</button></div>
+    </div>`:''}
+    ${!S.isAdmin?`<div style="margin-top:8px"><button class="btn btn-p btn-f" data-a="continuer-insp" data-rid="${r.id}">✏️ Modifier l'intervention</button></div>`:''}
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   VUE : ADMIN — Liste rapports
+══════════════════════════════════════════════ */
+function vAdmin(){
+  const tab=S.adminTab||'rapports';
+  const tabs=`
+  <div style="display:flex;gap:0;background:var(--bg);border-radius:var(--radius-sm);padding:3px;margin-bottom:14px;border:1px solid var(--border)">
+    ${[['rapports','📋 Rapports'],['tournees','🗓 Tournées'],['users','👥 Utilisateurs']].map(([v,l])=>`
+    <button data-a="admin-tab" data-tab="${v}" style="flex:1;padding:7px 4px;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;background:${tab===v?'var(--bl)':'transparent'};color:${tab===v?'#fff':'var(--muted)'}">
+      ${l}</button>`).join('')}
+  </div>`;
+
+  let content='';
+
+  if(tab==='rapports'){
+    const filtre=S.adminFiltre||'tous';
+    const sorted=[...S.rapports].sort((a,b)=>b.createdAt-a.createdAt);
+    const df=S.exportDateFrom,dt=S.exportDateTo;
+    let filtred=filtre==='non-termine'?sorted.filter(r=>r.complet===false):
+                filtre==='termine'?sorted.filter(r=>r.complet!==false):sorted;
+    if(df)filtred=filtred.filter(r=>new Date(r.createdAt)>=new Date(df));
+    if(dt)filtred=filtred.filter(r=>new Date(r.createdAt)<=new Date(dt+'T23:59:59'));
+
+    const nbSel=S.exportSel.size;
+    content=`
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Filtres & Export</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div class="field" style="margin:0"><label>Du</label><input type="date" id="exp-from" value="${df}" data-a="exp-date" data-which="from"></div>
+        <div class="field" style="margin:0"><label>Au</label><input type="date" id="exp-to" value="${dt}" data-a="exp-date" data-which="to"></div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+        ${[['tous','Tous',sorted.length],['termine','✓ Terminés',sorted.filter(r=>r.complet!==false).length],['non-termine','⚠ Non terminés',sorted.filter(r=>r.complet===false).length]].map(([v,l,n])=>`
+          <button data-a="admin-filtre" data-filtre="${v}" style="padding:5px 10px;border:1.5px solid ${filtre===v?'var(--bl)':'var(--border)'};border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:${filtre===v?'var(--bl)':'var(--card)'};color:${filtre===v?'#fff':'var(--muted)'}">
+            ${l} <span style="opacity:.7">${n}</span></button>`).join('')}
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm" data-a="exp-sel-all" style="flex:1">☑ Tout sélectionner (${filtred.length})</button>
+        <button class="btn btn-sm" data-a="exp-desel-all" style="flex:1">☐ Désélectionner</button>
+      </div>
+      ${nbSel>0?`<button class="btn btn-p btn-f" data-a="export-sel" style="margin-top:8px">📥 Exporter ${nbSel} rapport${nbSel>1?'s':''} sélectionné${nbSel>1?'s':''}</button>`:''}
+    </div>
+    ${filtred.length===0
+      ?`<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Aucun rapport</div></div>`
+      :filtred.map(r=>{
+        const pav=getPav(r.pavId);
+        const nonTermine=r.complet===false;
+        const sel=S.exportSel.has(r.id);
+        return `<div class="rpt-row" style="${nonTermine?'border-left:3px solid var(--or)':''}${sel?'background:var(--bll);':''}" >
+          <div style="display:flex;align-items:center;gap:10px">
+            <input type="checkbox" data-a="exp-chk" data-rid="${r.id}"${sel?' checked':''} style="width:18px;height:18px;accent-color:var(--blm);flex-shrink:0">
+            <div style="flex:1;cursor:pointer" data-a="go-rpt" data-rid="${r.id}">
+              <div class="rpt-head">
+                <span class="rpt-pav">${esc(pav?.nom||r.pavId)} — PAV ${esc(pav?.no||'')}</span>
+                <div style="display:flex;gap:4px">
+                  ${nonTermine?`<span class="badge b-or">⚠</span>`:''}
+                  <span class="badge ${r.statut==='ok'?'b-ok':'b-or'}">${r.statut==='ok'?'✓':'⚠'}</span>
+                </div>
+              </div>
+              <div class="rpt-addr">${esc(pav?.addr||'')}</div>
+              <div class="rpt-date" style="margin-top:4px">${fdt(r.createdAt)} · ${esc(r.operateur)}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}`;
+
+  } else if(tab==='tournees'){
+    const sorted=[...S.tournees].sort((a,b)=>b.date.localeCompare(a.date));
+    const isToday=t=>t.date===todayStr();
+    content=`
+    <button class="btn btn-p btn-f" data-a="new-tournee" style="margin-bottom:12px">＋ Créer une tournée</button>
+    ${sorted.length===0?`<div class="empty"><div class="empty-icon">🗓</div><div class="empty-text">Aucune tournée planifiée</div></div>`
+    :sorted.map(t=>{
+      const done=t.pavIds.filter(id=>S.rapports.some(r=>r.pavId===id)).length;
+      return `<div class="rpt-row">
+        <div class="rpt-head">
+          <span class="rpt-pav">${esc(t.operateur)}</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            ${isToday(t)?`<span class="badge b-ok">Aujourd'hui</span>`:''}
+            <span class="badge b-bl">${done}/${t.pavIds.length}</span>
+          </div>
+        </div>
+        <div class="rpt-addr">${t.date.split('-').reverse().join('/')}</div>
+        <div style="background:var(--border);border-radius:4px;height:4px;margin:8px 0 10px">
+          <div style="background:var(--gr);height:4px;border-radius:4px;width:${t.pavIds.length?Math.round(done/t.pavIds.length*100):0}%"></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm" data-a="suivi-tournee" data-tid="${t.id}" style="flex:1">👁 Suivi</button>
+          <button class="btn btn-sm" data-a="edit-tournee" data-tid="${t.id}" style="flex:1">✏️ Modifier</button>
+          <button class="btn btn-sm btn-d" data-a="del-tournee" data-tid="${t.id}">🗑</button>
+        </div>
+      </div>`;
+    }).join('')}`;
+
+  } else if(tab==='users'){
+    content=`
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Nouvel utilisateur</div>
+      <div class="field"><label>Nom</label><input type="text" id="new-user-nom" placeholder="Prénom Nom"></div>
+      <div class="field"><label>Mot de passe</label><input type="password" id="new-user-pwd" placeholder="••••••"></div>
+      <div class="field">
+        <label>Rôle</label>
+        <select id="new-user-role" style="width:100%;padding:10px 13px;border:1.5px solid var(--border2);border-radius:9px;font-size:15px">
+          <option value="controleur">Contrôleur</option>
+          <option value="admin">Administrateur</option>
+        </select>
+      </div>
+      <button class="btn btn-p btn-f" data-a="add-user">＋ Ajouter</button>
+    </div>
+    ${S.users.length===0?`<div class="empty"><div class="empty-icon">👥</div><div class="empty-text">Aucun utilisateur créé</div></div>`
+    :S.users.map(u=>`<div class="rpt-row" style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-weight:700;font-size:14px">${esc(u.nom)}</div>
+        <div style="margin-top:3px"><span class="badge ${u.admin?'b-or':'b-bl'}">${u.admin?'Admin':'Contrôleur'}</span></div>
+      </div>
+      <button class="btn btn-sm btn-d" data-a="del-user" data-uid="${u.id}">🗑</button>
+    </div>`).join('')}`;
+  }
+
+  return `
+  <div class="hdr">
+    <button class="hdr-back" data-a="back">←</button>
+    <div style="flex:1;min-width:0"><div class="hdr-title">Administration</div></div>
+  </div>
+  <div class="pg">${tabs}${content}</div>`;
+}
+
+
+/* ══════════════════════════════════════════════
+   VUE : CRÉATION / ÉDITION TOURNÉE
+══════════════════════════════════════════════ */
+function vTourneeEdit(){
+  const tf=S.tourneeForm;
+  if(!tf)return go('admin');
+  const q=(S.tourneeSearch||'').toLowerCase();
+  const sel=new Set(tf.pavIds);
+
+  const filtered=PAVS.filter(p=>
+    !q||p.nom.toLowerCase().includes(q)||p.no.includes(q)||
+    p.addr.toLowerCase().includes(q)||p.zone.toLowerCase().includes(q)
+  );
+  const zones={};
+  filtered.forEach(p=>{
+    if(!zones[p.zone])zones[p.zone]=[];
+    zones[p.zone].push(p);
+  });
+
+  const zonesHtml=Object.entries(zones).sort(([a],[b])=>a.localeCompare(b)).map(([z,pavs])=>`
+    <div class="zone-hdr" style="cursor:pointer" data-a="sel-zone" data-zone="${esc(z)}">
+      ${esc(z.replace('ALM - ',''))}
+      <span style="font-weight:400;color:var(--muted)">${pavs.length}</span>
+      <button class="btn btn-sm" data-a="sel-zone" data-zone="${esc(z)}" style="margin-left:auto;padding:3px 9px;font-size:11px">Tout sélectionner</button>
+    </div>
+    ${pavs.map(p=>`
+      <div class="pav" style="padding:9px 12px;${sel.has(p.id)?'border:2px solid var(--blm);background:var(--bll);':''}">
+        <label style="display:flex;align-items:center;gap:12px;width:100%;cursor:pointer">
+          <input type="checkbox" data-a="sel-pav" data-pid="${p.id}"${sel.has(p.id)?' checked':''} style="width:20px;height:20px;accent-color:var(--blm);flex-shrink:0">
+          <div class="pav-badge" style="${sel.has(p.id)?'background:var(--bl);':''}">
+            <span style="${sel.has(p.id)?'color:rgba(255,255,255,.7)':''}">PAV</span>
+            <span style="${sel.has(p.id)?'color:#fff':''}">${esc(p.no)}</span>
+          </div>
+          <div class="pav-info">
+            <div class="pav-name">${esc(p.nom)}</div>
+            <div class="pav-addr">${esc(p.addr)}</div>
+          </div>
+        </label>
+      </div>`).join('')}
+  `).join('');
+
+  return `
+  <div class="hdr">
+    <button class="hdr-back" data-a="back-tournee">←</button>
+    <div style="flex:1;min-width:0">
+      <div class="hdr-title">${tf.id?'Modifier la tournée':'Nouvelle tournée'}</div>
+      <div class="hdr-sub">${sel.size} PAV sélectionné${sel.size>1?'s':''}</div>
+    </div>
+    <button class="hdr-btn or" data-a="save-tournee">💾 Enregistrer</button>
+  </div>
+  <div class="pg">
+    <div class="card">
+      <div class="card-title">Paramètres</div>
+      <div class="field">
+        <label>Opérateur assigné <span style="color:var(--rd)">*</span></label>
+        ${S.users.filter(u=>!u.admin).length>0
+          ?`<select id="tf-operateur" style="width:100%;padding:10px 13px;border:1.5px solid var(--border2);border-radius:9px;font-size:15px;background:var(--card);color:var(--text)">
+              <option value="">— Sélectionner un opérateur —</option>
+              ${S.users.filter(u=>!u.admin).map(u=>`<option value="${esc(u.nom)}"${tf.operateur===u.nom?' selected':''}>${esc(u.nom)}</option>`).join('')}
+              ${S.users.filter(u=>u.admin).map(u=>`<option value="${esc(u.nom)}"${tf.operateur===u.nom?' selected':''}>${esc(u.nom)} (Admin)</option>`).join('')}
+            </select>`
+          :`<input type="text" id="tf-operateur" value="${esc(tf.operateur)}" placeholder="Prénom Nom (aucun utilisateur créé)">`
+        }
+      </div>
+      <div class="field">
+        <label>Date de la tournée <span style="color:var(--rd)">*</span></label>
+        <input type="date" id="tf-date" value="${esc(tf.date)}">
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:8px">
+        Sélection des PAV
+        <span class="badge b-bl" style="font-size:11px">${sel.size} sélectionné${sel.size>1?'s':''}</span>
+      </div>
+      <div class="search-wrap" style="margin-bottom:10px">
+        <input type="search" id="tsearch-in" placeholder="Filtrer par PAV, adresse, zone…" value="${esc(S.tourneeSearch||'')}">
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="btn btn-sm" data-a="sel-all-pav" style="flex:1">☑ Tout sélectionner</button>
+        <button class="btn btn-sm" data-a="desel-all-pav" style="flex:1">☐ Tout désélectionner</button>
+      </div>
+      ${zonesHtml}
+    </div>
+    <button class="btn btn-p btn-f" data-a="save-tournee" style="font-size:16px;padding:14px">💾 Enregistrer la tournée</button>
+  </div>`;
+}
+/* ══════════════════════════════════════════════
+   VUE : SUIVI TOURNÉE
+══════════════════════════════════════════════ */
+function vSuiviTournee(){
+  const t=S.tournees.find(t=>t.id===S.tid);
+  if(!t)return go('admin');
+  const pavs=t.pavIds.map(id=>PAVS.find(p=>p.id===id)).filter(Boolean);
+  const done=pavs.filter(p=>S.rapports.some(r=>r.pavId===p.id));
+  const todo=pavs.filter(p=>!S.rapports.some(r=>r.pavId===p.id));
+  const nonTermine=pavs.filter(p=>{const lr=lastRapport(p.id);return lr&&lr.complet===false;});
+  return `
+  <div class="hdr">
+    <button class="hdr-back" data-a="back-suivi">←</button>
+    <div style="flex:1;min-width:0">
+      <div class="hdr-title">Suivi — ${esc(t.operateur)}</div>
+      <div class="hdr-sub">${t.date.split('-').reverse().join('/')} · ${done.length}/${pavs.length} effectués</div>
+    </div>
+  </div>
+  <div class="pg">
+    <div style="background:var(--bl);border-radius:var(--radius);padding:14px;margin-bottom:14px;color:#fff">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:700;opacity:.8">Progression</span>
+        <span style="font-size:20px;font-weight:800">${pavs.length?Math.round(done.length/pavs.length*100):0}%</span>
+      </div>
+      <div style="background:rgba(255,255,255,.2);border-radius:6px;height:8px">
+        <div style="background:#fff;height:8px;border-radius:6px;width:${pavs.length?Math.round(done.length/pavs.length*100):0}%"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;text-align:center">
+        <div><div style="font-size:20px;font-weight:800">${pavs.length}</div><div style="font-size:11px;opacity:.7">Total</div></div>
+        <div><div style="font-size:20px;font-weight:800;color:#7dde9a">${done.length}</div><div style="font-size:11px;opacity:.7">Faits</div></div>
+        <div><div style="font-size:20px;font-weight:800;color:#fbbf24">${todo.length}</div><div style="font-size:11px;opacity:.7">Restants</div></div>
+      </div>
+    </div>
+    ${nonTermine.length?`<div class="card" style="border-left:3px solid var(--or);margin-bottom:12px">
+      <div class="card-title">⚠ Non terminés (${nonTermine.length})</div>
+      ${nonTermine.map(p=>`<div class="dr"><span class="dl">PAV ${esc(p.no)}</span><span class="dv">${esc(p.addr)}</span></div>`).join('')}
+    </div>`:''}
+    ${todo.length?`<div class="card" style="margin-bottom:12px">
+      <div class="card-title">⏳ Restants (${todo.length})</div>
+      ${todo.map(p=>`<div class="dr"><span class="dl">PAV ${esc(p.no)}</span><span class="dv">${esc(p.addr)}</span></div>`).join('')}
+    </div>`:''}
+    ${done.length?`<div class="card">
+      <div class="card-title">✓ Effectués (${done.length})</div>
+      ${done.map(p=>{const lr=lastRapport(p.id);return`<div class="dr"><span class="dl">PAV ${esc(p.no)} — ${esc(p.addr)}</span><span class="dv"><span class="badge ${lr?.complet===false?'b-or':'b-ok'}">${lr?.complet===false?'⚠ Non terminé':'✓'}</span></span></div>`;}).join('')}
+    </div>`:''}
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   EXPORT MULTIPLE — un fichier .html par intervention, dans un .zip
+══════════════════════════════════════════════ */
+async function doExportMultiple(rapports){
+  if(!rapports.length)return;
+  if(typeof JSZip==='undefined'){toast('Erreur : bibliothèque ZIP indisponible','#C0392B');return;}
+  toast('⏳ Préparation du ZIP…','#1B3A5C');
+  const zip=new JSZip();
+  const usedNames=new Set();
+  rapports.forEach(r=>{
+    const pav=getPav(r.pavId);
+    const dateSlug=(r.createdAt?new Date(r.createdAt):new Date()).toISOString().slice(0,10);
+    let base=`${pav?.nom||r.pavId}_${dateSlug}`.replace(/[^a-zA-Z0-9_-]/g,'_');
+    let name=base+'.html',i=2;
+    while(usedNames.has(name)){name=`${base}_${i}.html`;i++;}
+    usedNames.add(name);
+    zip.file(name,exportRapport(r));
+  });
+  const blob=await zip.generateAsync({type:'blob'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`rapports_ALM_${rapports.length}_${Date.now()}.zip`;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+  toast(`📥 ${rapports.length} rapport${rapports.length>1?'s':''} exporté${rapports.length>1?'s':''} (.zip)`, '#2A7A4B');
+}
+
+/* ══════════════════════════════════════════════
+   MODALE SIGNATURE MANQUANTE
+══════════════════════════════════════════════ */
+function showModaleSignature(){
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:flex-end;justify-content:center';
+  overlay.innerHTML=`
+  <div style="background:#fff;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:520px;box-shadow:0 -4px 24px rgba(0,0,0,.15)">
+    <div style="font-size:16px;font-weight:700;color:var(--rd);margin-bottom:12px">✍️ Signature manquante</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px">La signature de l'intervenant est <strong>obligatoire</strong> pour enregistrer cette intervention. Merci de signer dans le cadre prévu avant de valider.</div>
+    <button id="modal-sig-ok" class="btn btn-p btn-f">✍️ Revenir signer</button>
+  </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('modal-sig-ok').onclick=()=>{
+    overlay.remove();
+    document.getElementById('sig-canvas')?.scrollIntoView({behavior:'smooth',block:'center'});
+  };
+}
+
+/* ══════════════════════════════════════════════
+   MODALE TÂCHES NON COCHÉES
+══════════════════════════════════════════════ */
+function showModaleTaches(tachesManquantes,onConfirm){
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:flex-end;justify-content:center';
+  overlay.innerHTML=`
+  <div style="background:#fff;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:520px;box-shadow:0 -4px 24px rgba(0,0,0,.15)">
+    <div style="font-size:16px;font-weight:700;color:var(--or);margin-bottom:12px">⚠️ Tâches non effectuées</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:14px">Les tâches suivantes ne sont pas cochées :</div>
+    <div style="background:var(--orl);border-radius:10px;padding:12px;margin-bottom:16px">
+      ${tachesManquantes.map(t=>`<div style="font-size:13px;color:var(--or);padding:4px 0;border-bottom:1px solid rgba(224,123,42,.15)">• ${esc(t.label)}</div>`).join('')}
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px">L'intervention sera enregistrée comme <strong style="color:var(--or)">Non terminée</strong>.</div>
+    <div style="display:flex;gap:10px">
+      <button id="modal-annuler" class="btn btn-f" style="flex:1">← Revenir corriger</button>
+      <button id="modal-confirmer" class="btn btn-or btn-f" style="flex:1">Enregistrer quand même</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('modal-annuler').onclick=()=>overlay.remove();
+  document.getElementById('modal-confirmer').onclick=()=>{overlay.remove();onConfirm();};
+}
+
+function exportRapport(r){
+  const pav=getPav(r.pavId);
+  const tachesHtml=TACHES.map(t=>{
+    const v=r.taches[t.id]||{fait:false,statut:'na'};
+    const col=v.statut==='ok'?'#2A7A4B':v.statut==='ko'?'#C0392B':'#6B7280';
+    const lbl=v.statut==='ok'?'✓ Fait':v.statut==='ko'?'✗ Non fait':'— N/A';
+    return `<tr><td style="padding:6px 8px;border:1px solid #ddd">${esc(t.label)}</td>
+      <td style="padding:6px 8px;border:1px solid #ddd;color:${col};font-weight:600">${lbl}</td></tr>`;
+  }).join('');
+
+  const photosHtml=(r.photos||[]).map(src=>`<img src="${src}" style="width:calc(50% - 6px);border-radius:8px;object-fit:cover;aspect-ratio:1">`).join('');
+
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+<title>Rapport ${pav?.nom||r.pavId} — ${fdt(r.createdAt)}</title>
+<style>body{font-family:Arial,sans-serif;max-width:800px;margin:0 auto;padding:24px;color:#1a1a1a;font-size:.9rem}
+h1{font-size:1.1rem;color:#1B3A5C;margin-bottom:4px}
+h2{font-size:.85rem;color:#1B3A5C;border-bottom:2px solid #1B3A5C;padding-bottom:3px;margin:18px 0 8px}
+table{width:100%;border-collapse:collapse;margin-bottom:8px}
+td{padding:5px 8px;border-bottom:1px solid #eee;font-size:.88rem}
+td:first-child{color:#555;width:38%}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.82rem;font-weight:700}
+.ok{background:#E4F5EC;color:#2A7A4B}.ko{background:#FDF0E4;color:#E07B2A}
+.photos{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.sig{border:1px solid #eee;border-radius:8px;margin-top:8px;max-width:220px;width:100%;display:block}
+@media print{body{padding:12px}@page{margin:12mm}}</style>
+</head><body>
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:12px;border-bottom:3px solid #1B3A5C">
+  <div>
+    <h1>Fiche d'intervention — Maintenance ALM</h1>
+    <div style="font-size:.82rem;color:#666">Abris Bac · Angers Loire Métropole</div>
+  </div>
+  <span class="badge ${r.statut==='ok'?'ok':'ko'}">${r.statut==='ok'?'✓ Conforme':'⚠ Non conforme'}</span>
+</div>
+<h2>Identification du point</h2>
+<table>
+  <tr><td>N° PAV Plan</td><td><strong>${esc(pav?.no||'')}</strong></td></tr>
+  <tr><td>Nom borne</td><td>${esc(pav?.nom||'')}</td></tr>
+  <tr><td>Adresse</td><td>${esc(pav?.addr||'')}</td></tr>
+  <tr><td>Zone</td><td>${esc(pav?.zone||'')}</td></tr>
+  <tr><td>Coordonnées GPS</td><td>${esc(pav?.gps||'')}</td></tr>
+  ${pav?.rem?`<tr><td>Remarque</td><td>${esc(pav.rem)}</td></tr>`:''}
+</table>
+<h2>Intervention</h2>
+<table>
+  <tr><td>Opérateur</td><td>${esc(r.operateur)}</td></tr>
+  <tr><td>Date et heure</td><td><strong>${fdt(r.createdAt)}</strong></td></tr>
+</table>
+${photosHtml?`<h2>Photos</h2><div class="photos">${photosHtml}</div>`:''}
+<h2>Tâches effectuées</h2>
+<table><thead><tr style="background:#E8EFF7"><th style="padding:6px 8px;text-align:left;border:1px solid #ddd">Tâche</th><th style="padding:6px 8px;text-align:left;border:1px solid #ddd">Statut</th></tr></thead><tbody>${tachesHtml}</tbody></table>
+${r.tachesLibres?`<h2>Tâches supplémentaires</h2><p style="font-size:.88rem;line-height:1.5">${esc(r.tachesLibres)}</p>`:''}
+${r.remarques?`<h2>Remarques et consignes</h2><p style="font-size:.88rem;line-height:1.5">${esc(r.remarques)}</p>`:''}
+${r.commentaire?`<h2>Commentaire général</h2><p style="font-size:.88rem;line-height:1.5">${esc(r.commentaire)}</p>`:''}
+<h2>Signature</h2>
+<table><tr><td>Signataire</td><td>${esc(r.nomSignataire||r.operateur)}</td></tr></table>
+${r.signature?`<img src="${r.signature}" class="sig" alt="Signature">`:'<p style="color:#aaa;font-size:.85rem">Aucune signature</p>'}
+<p style="color:#bbb;font-size:.75rem;margin-top:24px;border-top:1px solid #eee;padding-top:10px;text-align:center">
+  Document généré le ${fdt(Date.now())} — Maintenance ALM · Angers Loire Métropole
+</p>
+</body></html>`;
+}
+
+function doExportRapport(id){
+  const r=getRapport(id);if(!r)return;
+  const pav=getPav(r.pavId);
+  const html=exportRapport(r);
+  const b=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b);
+  a.download=`rapport_${pav?.nom||r.pavId}_${r.id}.html`;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+}
+
+function doExportAll(){
+  const sorted=[...S.rapports].sort((a,b)=>b.createdAt-a.createdAt);
+  if(!sorted.length){toast('Aucun rapport','#C0392B');return;}
+  doExportMultiple(sorted);
+}
+
+/* ══════════════════════════════════════════════
+   CANVAS SIGNATURE
+══════════════════════════════════════════════ */
+let sigDrawing=false,sigCtx=null,sigCanvas=null,sigHasContent=false;
+
+function initSig(){
+  sigCanvas=document.getElementById('sig-canvas');
+  if(!sigCanvas)return;
+  const rect=sigCanvas.getBoundingClientRect();
+  sigCanvas.width=rect.width*window.devicePixelRatio;
+  sigCanvas.height=rect.height*window.devicePixelRatio;
+  sigCtx=sigCanvas.getContext('2d');
+  sigCtx.scale(window.devicePixelRatio,window.devicePixelRatio);
+  sigCtx.strokeStyle='#1B3A5C';
+  sigCtx.lineWidth=2.5;
+  sigCtx.lineCap='round';
+  sigCtx.lineJoin='round';
+
+  /* Restaurer une signature déjà tracée avant ce re-rendu (le canvas est
+     recréé à chaque draw(), donc sans cela tout tracé serait perdu au
+     moindre autre changement dans le formulaire — coche d'une tâche, etc.) */
+  sigHasContent=false;
+  if(S.form&&S.form.signature){
+    const img=new Image();
+    img.onload=()=>{
+      sigCtx.drawImage(img,0,0,rect.width,rect.height);
+      sigHasContent=true;
+    };
+    img.src=S.form.signature;
+  }
+
+  const pos=e=>{
+    const r=sigCanvas.getBoundingClientRect();
+    if(e.touches){return{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top};}
+    return{x:e.clientX-r.left,y:e.clientY-r.top};
+  };
+
+  sigCanvas.addEventListener('mousedown',e=>{sigDrawing=true;sigHasContent=true;sigCtx.beginPath();const p=pos(e);sigCtx.moveTo(p.x,p.y);});
+  sigCanvas.addEventListener('mousemove',e=>{if(!sigDrawing)return;const p=pos(e);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();});
+  sigCanvas.addEventListener('mouseup',()=>{sigDrawing=false;snapSig();});
+  sigCanvas.addEventListener('touchstart',e=>{e.preventDefault();sigDrawing=true;sigHasContent=true;sigCtx.beginPath();const p=pos(e);sigCtx.moveTo(p.x,p.y);},{passive:false});
+  sigCanvas.addEventListener('touchmove',e=>{e.preventDefault();if(!sigDrawing)return;const p=pos(e);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();},{passive:false});
+  sigCanvas.addEventListener('touchend',()=>{sigDrawing=false;snapSig();});
+}
+
+/* Capture le canvas UNIQUEMENT si du contenu a réellement été tracé —
+   sinon un canvas vierge (transparent) produirait quand même une dataURL
+   "valide" et passerait à tort la validation obligatoire. */
+function snapSig(){
+  if(!sigCanvas||!S.form)return;
+  if(sigHasContent){
+    S.form.signature=sigCanvas.toDataURL('image/png');
+  }
+}
+
+function clearSig(){
+  if(!sigCanvas||!sigCtx)return;
+  sigCtx.clearRect(0,0,sigCanvas.width/window.devicePixelRatio,sigCanvas.height/window.devicePixelRatio);
+  sigHasContent=false;
+  if(S.form)S.form.signature=null;
+  draw();
+}
+
+/* ══════════════════════════════════════════════
+   IMAGE COMPRESSION
+══════════════════════════════════════════════ */
+const compress=f=>new Promise(res=>{
+  const rd=new FileReader();
+  rd.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const M=700,cv=document.createElement('canvas');
+      let w=img.width,h=img.height;
+      if(w>M||h>M){if(w>h){h=Math.round(h*M/w);w=M;}else{w=Math.round(w*M/h);h=M;}}
+      cv.width=w;cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      res(cv.toDataURL('image/jpeg',.62));
+    };
+    img.src=ev.target.result;
+  };
+  rd.readAsDataURL(f);
+});
+
+/* ══════════════════════════════════════════════
+   SNAP FORM
+══════════════════════════════════════════════ */
+function snapForm(){
+  if(S.view!=='form'||!S.form)return;
+  const g=id=>document.getElementById(id);
+  if(g('f-taches-libres'))S.form.tachesLibres=g('f-taches-libres').value;
+  if(g('f-remarques'))S.form.remarques=g('f-remarques').value;
+  if(g('f-commentaire'))S.form.commentaire=g('f-commentaire').value;
+  if(g('f-signataire'))S.form.nomSignataire=g('f-signataire').value;
+}
+
+/* ══════════════════════════════════════════════
+   AFTER DRAW
+══════════════════════════════════════════════ */
+function afterDraw(){
+  if(S.view==='home'){
+    const s=document.getElementById('search-in');
+    if(s){
+      s.addEventListener('input',e=>{S.search=e.target.value;draw();});
+      s.focus();
+    }
+  }
+  if(S.view==='tournee-edit'){
+    const s=document.getElementById('tsearch-in');
+    if(s)s.addEventListener('input',e=>{S.tourneeSearch=e.target.value;draw();});
+  }
+  if(S.view==='form'){initSig();}
+
+  document.getElementById('app').removeEventListener('click',onCk);
+  document.getElementById('app').addEventListener('click',onCk);
+  document.getElementById('app').removeEventListener('change',onCh);
+  document.getElementById('app').addEventListener('change',onCh);
+  document.getElementById('ph-in')?.removeEventListener('change',onPh);
+  document.getElementById('ph-in')?.addEventListener('change',onPh);
+}
+
+async function onPh(e){
+  const files=Array.from(e.target.files);
+  if(!files.length||!S.form)return;
+  snapForm();
+  const compressed=await Promise.all(files.map(compress));
+  S.form.photos=[...(S.form.photos||[]),...compressed];
+  e.target.value='';
+  draw();
+}
+
+/* ══════════════════════════════════════════════
+   EVENT HANDLERS
+══════════════════════════════════════════════ */
+function onCh(e){
+  const el=e.target;
+  if(el.dataset.a==='tk-check'&&S.form){
+    const tid=el.dataset.tid;
+    if(!S.form.taches[tid])S.form.taches[tid]={fait:false,statut:'na'};
+    S.form.taches[tid].fait=el.checked;
+    S.form.taches[tid].statut=el.checked?'ok':'na';
+    draw();
+  }
+  if(el.dataset.a==='tk-sta'&&S.form){
+    const tid=el.dataset.tid;
+    if(!S.form.taches[tid])S.form.taches[tid]={fait:false,statut:'na'};
+    S.form.taches[tid].statut=el.value;
+    if(el.value!=='na')S.form.taches[tid].fait=true;
+    draw();
+  }
+  if(el.dataset.a==='statut'&&S.form){S.form.statut=el.value;draw();}
+  if(el.dataset.a==='exp-date'){
+    if(el.dataset.which==='from')S.exportDateFrom=el.value;
+    else S.exportDateTo=el.value;
+    draw();
+  }
+}
+
+function onCk(e){
+  const el=e.target.closest('[data-a]');
+  if(!el)return;
+  const a=el.dataset.a;
+
+  if(a==='logout'){S.operateur='';S.isAdmin=false;go('login');}
+  else if(a==='go-admin'){S.adminTab='rapports';go('admin');}
+  else if(a==='admin-tab'){S.adminTab=el.dataset.tab;draw();}
+  else if(a==='admin-filtre'){S.adminFiltre=el.dataset.filtre;draw();}
+  else if(a==='new-tournee'){
+    S.tourneeForm={id:null,operateur:'',date:todayStr(),pavIds:[]};
+    S.tourneeSearch='';
+    go('tournee-edit');
+  }
+  else if(a==='edit-tournee'){
+    const t=getTournee(el.dataset.tid);
+    if(!t)return;
+    S.tourneeForm={...t,pavIds:[...t.pavIds]};
+    S.tourneeSearch='';
+    go('tournee-edit');
+  }
+  else if(a==='del-tournee'){
+    if(!confirm('Supprimer cette tournée ?'))return;
+    S.tournees=S.tournees.filter(t=>t.id!==el.dataset.tid);
+    saveTournees();
+    draw();
+  }
+  else if(a==='back-tournee'){
+    S.tourneeForm=null;S.tourneeSearch='';
+    S.adminTab='tournees';
+    go('admin');
+  }
+  else if(a==='sel-pav'&&S.tourneeForm){
+    const pid=el.dataset.pid;
+    /* Capturer les champs AVANT de redessiner pour éviter l'effacement */
+    const op=document.getElementById('tf-operateur')?.value||S.tourneeForm.operateur;
+    const dt=document.getElementById('tf-date')?.value||S.tourneeForm.date;
+    S.tourneeForm.operateur=op;
+    S.tourneeForm.date=dt;
+    if(el.checked){if(!S.tourneeForm.pavIds.includes(pid))S.tourneeForm.pavIds.push(pid);}
+    else{S.tourneeForm.pavIds=S.tourneeForm.pavIds.filter(id=>id!==pid);}
+    draw();
+  }
+  else if(a==='sel-zone'&&S.tourneeForm){
+    const op=document.getElementById('tf-operateur')?.value||S.tourneeForm.operateur;
+    const dt=document.getElementById('tf-date')?.value||S.tourneeForm.date;
+    S.tourneeForm.operateur=op;S.tourneeForm.date=dt;
+    const zone=el.dataset.zone;
+    const zonePavIds=PAVS.filter(p=>p.zone===zone).map(p=>p.id);
+    zonePavIds.forEach(id=>{if(!S.tourneeForm.pavIds.includes(id))S.tourneeForm.pavIds.push(id);});
+    draw();
+  }
+  else if(a==='sel-all-pav'&&S.tourneeForm){
+    const op=document.getElementById('tf-operateur')?.value||S.tourneeForm.operateur;
+    const dt=document.getElementById('tf-date')?.value||S.tourneeForm.date;
+    S.tourneeForm.operateur=op;S.tourneeForm.date=dt;
+    const q=(S.tourneeSearch||'').toLowerCase();
+    const visible=q?PAVS.filter(p=>p.nom.toLowerCase().includes(q)||p.no.includes(q)||p.addr.toLowerCase().includes(q)||p.zone.toLowerCase().includes(q)):PAVS;
+    visible.forEach(p=>{if(!S.tourneeForm.pavIds.includes(p.id))S.tourneeForm.pavIds.push(p.id);});
+    draw();
+  }
+  else if(a==='desel-all-pav'&&S.tourneeForm){
+    const op=document.getElementById('tf-operateur')?.value||S.tourneeForm.operateur;
+    const dt=document.getElementById('tf-date')?.value||S.tourneeForm.date;
+    S.tourneeForm.operateur=op;S.tourneeForm.date=dt;
+    S.tourneeForm.pavIds=[];
+    draw();
+  }
+  else if(a==='save-tournee'&&S.tourneeForm){
+    const op=(document.getElementById('tf-operateur')?.value||'').trim();
+    const dt=(document.getElementById('tf-date')?.value||'').trim();
+    if(!op){toast('Saisissez le nom de l\'opérateur','#C0392B');return;}
+    if(!dt){toast('Choisissez une date','#C0392B');return;}
+    if(!S.tourneeForm.pavIds.length){toast('Sélectionnez au moins un PAV','#C0392B');return;}
+    if(S.tourneeForm.id){
+      S.tournees=S.tournees.map(t=>t.id===S.tourneeForm.id?{...S.tourneeForm,operateur:op,date:dt}:t);
+    } else {
+      S.tournees=[...S.tournees,{...S.tourneeForm,id:uid(),operateur:op,date:dt}];
+    }
+    saveTournees();
+    S.tourneeForm=null;S.tourneeSearch='';
+    S.adminTab='tournees';
+    toast('✅ Tournée enregistrée','#2A7A4B');
+    go('admin');
+  }
+  else if(a==='back'){
+    if(S.view==='form'){snapForm();go('home');}
+    else if(S.view==='detail'){go(S.isAdmin&&S.fromAdmin?'admin':'home');}
+    else if(S.view==='admin')go('home');
+    else go('home');
+  }
+  else if(a==='back-suivi'){S.adminTab='tournees';go('admin');}
+  else if(a==='go-pav'){
+    const pid=el.dataset.pid;
+    S.pavId=pid;
+    S.form=mkForm(pid);
+    go('form');
+  }
+  else if(a==='add-ph'){document.getElementById('ph-in').click();}
+  else if(a==='del-ph'){
+    snapForm();
+    const idx=parseInt(el.dataset.idx);
+    S.form.photos=S.form.photos.filter((_,i)=>i!==idx);
+    draw();
+  }
+  else if(a==='zoom-ph'){
+    const lb=document.getElementById('lightbox');
+    const img=document.getElementById('lb-img');
+    if(lb&&img){img.src=el.dataset.src;lb.classList.add('open');}
+  }
+  else if(a==='clear-sig'){clearSig();}
+  else if(a==='save-form'){
+    snapForm();
+    snapSig();
+    const f=S.form;
+    if(!f.photos||!f.photos.length){toast('📷 Ajoutez au moins une photo avant d\'enregistrer','#C0392B');return;}
+    if(!(f.nomSignataire||'').trim()){toast('✍️ Saisissez le nom du signataire','#C0392B');return;}
+    if(!f.signature){showModaleSignature();return;}
+    const tachesNonCoches=TACHES.filter(t=>!f.taches[t.id]||!f.taches[t.id].fait);
+    const toutesCoches=tachesNonCoches.length===0;
+    const doSave=()=>{
+      f.complet=toutesCoches;
+      f.createdAt=f.createdAt||Date.now();
+      f.updatedAt=Date.now();
+      if(f._editId){
+        S.rapports=S.rapports.map(r=>r.id===f._editId?{...f,id:f._editId}:r);
+        delete f._editId;
+      } else {
+        S.rapports=[...S.rapports,f];
+      }
+      saveRapports();
+      toast(toutesCoches?'✅ Intervention enregistrée':'⚠️ Intervention enregistrée — non terminée',toutesCoches?'#2A7A4B':'#E07B2A');
+      go('home');
+    };
+    if(!toutesCoches){showModaleTaches(tachesNonCoches,doSave);}
+    else{doSave();}
+  }
+  else if(a==='continuer-insp'){
+    const r=getRapport(el.dataset.rid);
+    if(!r)return;
+    S.pavId=r.pavId;
+    S.form=JSON.parse(JSON.stringify(r)); /* deep copy */
+    S.form._editId=r.id; /* marquer comme édition */
+    go('form');
+  }
+  else if(a==='voir-rpt-pav'){
+    S.rid=el.dataset.rid;
+    S.fromAdmin=false;
+    go('detail');
+  }
+  else if(a==='voir-rpt'){
+    S.rid=el.dataset.rid;
+    S.fromAdmin=false;
+    go('detail');
+  }
+  else if(a==='go-rpt'){
+    S.rid=el.dataset.rid;
+    S.fromAdmin=S.view==='admin';
+    go('detail');
+  }
+  else if(a==='export-rpt'){doExportRapport(S.rid);}
+  else if(a==='export-all'){doExportAll();}
+  else if(a==='add-user'){
+    const nom=(document.getElementById('new-user-nom')?.value||'').trim();
+    const pwd=(document.getElementById('new-user-pwd')?.value||'').trim();
+    const role=document.getElementById('new-user-role')?.value||'controleur';
+    if(!nom){toast('Saisissez un nom','#C0392B');return;}
+    if(!pwd){toast('Saisissez un mot de passe','#C0392B');return;}
+    if(S.users.some(u=>u.nom.toLowerCase()===nom.toLowerCase())){toast('Cet utilisateur existe déjà','#C0392B');return;}
+    S.users=[...S.users,{id:uid(),nom,pwd,admin:role==='admin'}];
+    saveUsers();draw();
+  }
+  else if(a==='del-user'){
+    if(!confirm('Supprimer cet utilisateur ?'))return;
+    S.users=S.users.filter(u=>u.id!==el.dataset.uid);
+    saveUsers();draw();
+  }
+  else if(a==='exp-chk'){
+    if(el.checked)S.exportSel.add(el.dataset.rid);
+    else S.exportSel.delete(el.dataset.rid);
+    draw();
+  }
+  else if(a==='exp-sel-all'){
+    const filtre=S.adminFiltre||'tous';
+    const df=S.exportDateFrom,dt2=S.exportDateTo;
+    let filtred=[...S.rapports].sort((a,b)=>b.createdAt-a.createdAt);
+    if(filtre==='non-termine')filtred=filtred.filter(r=>r.complet===false);
+    if(filtre==='termine')filtred=filtred.filter(r=>r.complet!==false);
+    if(df)filtred=filtred.filter(r=>new Date(r.createdAt)>=new Date(df));
+    if(dt2)filtred=filtred.filter(r=>new Date(r.createdAt)<=new Date(dt2+'T23:59:59'));
+    filtred.forEach(r=>S.exportSel.add(r.id));
+    draw();
+  }
+  else if(a==='exp-desel-all'){S.exportSel.clear();draw();}
+  else if(a==='export-sel'){
+    const ids=[...S.exportSel];
+    if(!ids.length){toast('Aucun rapport sélectionné','#C0392B');return;}
+    const rpts=ids.map(id=>S.rapports.find(r=>r.id===id)).filter(Boolean);
+    doExportMultiple(rpts);
+  }
+  else if(a==='suivi-tournee'){S.tid=el.dataset.tid;go('suivi-tournee');}
+  else if(a==='modifier-rapport'){
+    const r=getRapport(S.rid);
+    if(!r)return;
+    S.pavId=r.pavId;
+    S.form=JSON.parse(JSON.stringify(r));
+    S.form._editId=r.id;
+    go('form');
+  }
+  else if(a==='ask-del-rpt'){
+    const z=document.getElementById('del-z');
+    if(z)z.innerHTML=`<div class="alert-card"><div class="alert-title">⚠ Supprimer ce rapport ?</div>
+      <div class="btn-row"><button class="btn btn-d" data-a="do-del-rpt">🗑 Supprimer</button>
+      <button class="btn" data-a="cancel-del">Annuler</button></div></div>`;
+  }
+  else if(a==='do-del-rpt'){
+    S.rapports=S.rapports.filter(r=>r.id!==S.rid);
+    saveRapports();
+    toast('Rapport supprimé');
+    go('admin');
+  }
+  else if(a==='cancel-del'){draw();}
+}
+
+/* ══════════════════════════════════════════════
+   LIGHTBOX
+══════════════════════════════════════════════ */
+function closeLb(){document.getElementById('lightbox')?.classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLb();});
+
+/* ══════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════ */
+function toast(msg,color='#1B3A5C'){
+  const t=document.createElement('div');
+  t.className='toast';
+  t.textContent=msg;
+  t.style.background=color;
+  t.style.color='#fff';
+  document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),400);},2200);
+}
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+loadRapports();
+loadTournees();
+loadUsers();
+draw();
+</script>
+</body>
+</html>
