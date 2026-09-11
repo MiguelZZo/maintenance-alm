@@ -510,9 +510,6 @@ const TACHES=[
    CONFIG
 ══════════════════════════════════════════════ */
 const ADMIN_PWD='alm2025';
-const LS_KEY='alm_rapports';
-const LS_TOURNEES='alm_tournees';
-const LS_USERS='alm_users';
 
 /* ══════════════════════════════════════════════
    STATE
@@ -555,23 +552,57 @@ const getPav=id=>PAVS.find(p=>p.id===id);
 const getRapport=id=>S.rapports.find(r=>r.id===id);
 const lastRapport=pavId=>S.rapports.filter(r=>r.pavId===pavId).sort((a,b)=>b.createdAt-a.createdAt)[0]||null;
 
-function loadRapports(){
-  try{const d=localStorage.getItem(LS_KEY);S.rapports=d?JSON.parse(d):[];}catch{S.rapports=[];}
+/* ══════════════════════════════════════════════
+   FIREBASE
+══════════════════════════════════════════════ */
+const FB_URL='https://envie-anjou-sav-default-rtdb.europe-west1.firebasedatabase.app/alm';
+
+async function loadRapports(){
+  try{
+    const r=await fetch(FB_URL+'/rapports.json');
+    const data=await r.json();
+    S.rapports=data?Object.values(data):[];
+  }catch{S.rapports=[];}
 }
-function saveRapports(){
-  try{localStorage.setItem(LS_KEY,JSON.stringify(S.rapports));}catch{}
+async function saveRapport(rap){
+  await fetch(FB_URL+'/rapports/'+encodeURIComponent(rap.id)+'.json',{
+    method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(rap)
+  });
 }
-function loadTournees(){
-  try{const d=localStorage.getItem(LS_TOURNEES);S.tournees=d?JSON.parse(d):[];}catch{S.tournees=[];}
+async function deleteRapportFB(id){
+  await fetch(FB_URL+'/rapports/'+encodeURIComponent(id)+'.json',{method:'DELETE'});
 }
-function saveTournees(){
-  try{localStorage.setItem(LS_TOURNEES,JSON.stringify(S.tournees));}catch{}
+
+async function loadTournees(){
+  try{
+    const r=await fetch(FB_URL+'/tournees.json');
+    const data=await r.json();
+    S.tournees=data?Object.values(data):[];
+  }catch{S.tournees=[];}
 }
-function loadUsers(){
-  try{const d=localStorage.getItem(LS_USERS);S.users=d?JSON.parse(d):[];}catch{S.users=[];}
+async function saveTournee(t){
+  await fetch(FB_URL+'/tournees/'+encodeURIComponent(t.id)+'.json',{
+    method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(t)
+  });
 }
-function saveUsers(){
-  try{localStorage.setItem(LS_USERS,JSON.stringify(S.users));}catch{}
+async function deleteTourneeFB(id){
+  await fetch(FB_URL+'/tournees/'+encodeURIComponent(id)+'.json',{method:'DELETE'});
+}
+
+async function loadUsers(){
+  try{
+    const r=await fetch(FB_URL+'/users.json');
+    const data=await r.json();
+    S.users=data?Object.values(data):[];
+  }catch{S.users=[];}
+}
+async function saveUser(u){
+  await fetch(FB_URL+'/users/'+encodeURIComponent(u.id)+'.json',{
+    method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(u)
+  });
+}
+async function deleteUserFB(id){
+  await fetch(FB_URL+'/users/'+encodeURIComponent(id)+'.json',{method:'DELETE'});
 }
 const getTournee=id=>S.tournees.find(t=>t.id===id);
 const todayStr=()=>new Date().toISOString().slice(0,10);
@@ -1066,7 +1097,10 @@ function vAdmin(){
         <div style="font-weight:700;font-size:14px">${esc(u.nom)}</div>
         <div style="margin-top:3px"><span class="badge ${u.admin?'b-or':'b-bl'}">${u.admin?'Admin':'Contrôleur'}</span></div>
       </div>
-      <button class="btn btn-sm btn-d" data-a="del-user" data-uid="${u.id}">🗑</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm" data-a="edit-user-pwd" data-uid="${u.id}">🔑 Mot de passe</button>
+        <button class="btn btn-sm btn-d" data-a="del-user" data-uid="${u.id}">🗑</button>
+      </div>
     </div>`).join('')}`;
   }
 
@@ -1520,7 +1554,7 @@ function onCh(e){
   }
 }
 
-function onCk(e){
+async function onCk(e){
   const el=e.target.closest('[data-a]');
   if(!el)return;
   const a=el.dataset.a;
@@ -1544,7 +1578,7 @@ function onCk(e){
   else if(a==='del-tournee'){
     if(!confirm('Supprimer cette tournée ?'))return;
     S.tournees=S.tournees.filter(t=>t.id!==el.dataset.tid);
-    saveTournees();
+    await deleteTourneeFB(el.dataset.tid);
     draw();
   }
   else if(a==='back-tournee'){
@@ -1594,12 +1628,15 @@ function onCk(e){
     if(!op){toast('Saisissez le nom de l\'opérateur','#C0392B');return;}
     if(!dt){toast('Choisissez une date','#C0392B');return;}
     if(!S.tourneeForm.pavIds.length){toast('Sélectionnez au moins un PAV','#C0392B');return;}
+    const tourneeFinale=S.tourneeForm.id
+      ?{...S.tourneeForm,operateur:op,date:dt}
+      :{...S.tourneeForm,id:uid(),operateur:op,date:dt};
     if(S.tourneeForm.id){
-      S.tournees=S.tournees.map(t=>t.id===S.tourneeForm.id?{...S.tourneeForm,operateur:op,date:dt}:t);
+      S.tournees=S.tournees.map(t=>t.id===S.tourneeForm.id?tourneeFinale:t);
     } else {
-      S.tournees=[...S.tournees,{...S.tourneeForm,id:uid(),operateur:op,date:dt}];
+      S.tournees=[...S.tournees,tourneeFinale];
     }
-    saveTournees();
+    await saveTournee(tourneeFinale);
     S.tourneeForm=null;S.tourneeSearch='';
     S.adminTab='tournees';
     toast('✅ Tournée enregistrée','#2A7A4B');
@@ -1640,19 +1677,25 @@ function onCk(e){
     if(!f.signature){showModaleSignature();return;}
     const tachesNonCoches=TACHES.filter(t=>!f.taches[t.id]||!f.taches[t.id].fait);
     const toutesCoches=tachesNonCoches.length===0;
-    const doSave=()=>{
+    const doSave=async()=>{
       f.complet=toutesCoches;
       f.createdAt=f.createdAt||Date.now();
       f.updatedAt=Date.now();
-      if(f._editId){
-        S.rapports=S.rapports.map(r=>r.id===f._editId?{...f,id:f._editId}:r);
-        delete f._editId;
-      } else {
-        S.rapports=[...S.rapports,f];
+      const editId=f._editId;
+      delete f._editId;
+      toast('⏳ Enregistrement…','#1B3A5C');
+      try{
+        await saveRapport(f);
+        if(editId){
+          S.rapports=S.rapports.map(r=>r.id===editId?f:r);
+        } else {
+          S.rapports=[...S.rapports,f];
+        }
+        toast(toutesCoches?'✅ Intervention enregistrée':'⚠️ Intervention enregistrée — non terminée',toutesCoches?'#2A7A4B':'#E07B2A');
+        go('home');
+      }catch(err){
+        toast('❌ Erreur d\'enregistrement — réessayez','#C0392B');
       }
-      saveRapports();
-      toast(toutesCoches?'✅ Intervention enregistrée':'⚠️ Intervention enregistrée — non terminée',toutesCoches?'#2A7A4B':'#E07B2A');
-      go('home');
     };
     if(!toutesCoches){showModaleTaches(tachesNonCoches,doSave);}
     else{doSave();}
@@ -1689,13 +1732,28 @@ function onCk(e){
     if(!nom){toast('Saisissez un nom','#C0392B');return;}
     if(!pwd){toast('Saisissez un mot de passe','#C0392B');return;}
     if(S.users.some(u=>u.nom.toLowerCase()===nom.toLowerCase())){toast('Cet utilisateur existe déjà','#C0392B');return;}
-    S.users=[...S.users,{id:uid(),nom,pwd,admin:role==='admin'}];
-    saveUsers();draw();
+    const newUser={id:uid(),nom,pwd,admin:role==='admin'};
+    S.users=[...S.users,newUser];
+    await saveUser(newUser);
+    draw();
   }
   else if(a==='del-user'){
     if(!confirm('Supprimer cet utilisateur ?'))return;
     S.users=S.users.filter(u=>u.id!==el.dataset.uid);
-    saveUsers();draw();
+    await deleteUserFB(el.dataset.uid);
+    draw();
+  }
+  else if(a==='edit-user-pwd'){
+    const u=S.users.find(u=>u.id===el.dataset.uid);
+    if(!u)return;
+    const newPwd=prompt(`Nouveau mot de passe pour ${u.nom} :`);
+    if(newPwd===null)return;
+    if(!newPwd.trim()){toast('Mot de passe vide, non modifié','#C0392B');return;}
+    const updated={...u,pwd:newPwd.trim()};
+    S.users=S.users.map(x=>x.id===u.id?updated:x);
+    await saveUser(updated);
+    toast('✅ Mot de passe modifié','#2A7A4B');
+    draw();
   }
   else if(a==='exp-chk'){
     if(el.checked)S.exportSel.add(el.dataset.rid);
@@ -1736,8 +1794,9 @@ function onCk(e){
       <button class="btn" data-a="cancel-del">Annuler</button></div></div>`;
   }
   else if(a==='do-del-rpt'){
-    S.rapports=S.rapports.filter(r=>r.id!==S.rid);
-    saveRapports();
+    const delId=S.rid;
+    S.rapports=S.rapports.filter(r=>r.id!==delId);
+    await deleteRapportFB(delId);
     toast('Rapport supprimé');
     go('admin');
   }
@@ -1766,10 +1825,27 @@ function toast(msg,color='#1B3A5C'){
 /* ══════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════ */
-loadRapports();
-loadTournees();
-loadUsers();
-draw();
+async function init(){
+  document.getElementById('app').innerHTML=`
+    <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:rgba(255,255,255,.8);background:var(--bl)">
+      <div style="font-size:2.2rem">🗑</div>
+      <div style="font-size:14px">Chargement des données…</div>
+    </div>`;
+  try{
+    await Promise.all([loadRapports(),loadTournees(),loadUsers()]);
+  }catch(e){
+    document.getElementById('app').innerHTML=`
+      <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;background:var(--bl);color:#fff">
+        <div style="font-size:2rem">⚠️</div>
+        <div style="font-weight:600">Connexion impossible à la base de données</div>
+        <div style="font-size:13px;opacity:.7">${esc(e.message||'')}</div>
+        <button class="btn btn-or" style="margin-top:12px" onclick="init()">Réessayer</button>
+      </div>`;
+    return;
+  }
+  draw();
+}
+init();
 </script>
 </body>
 </html>
