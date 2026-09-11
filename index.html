@@ -645,8 +645,8 @@ function vLogin(){
           <div class="field" style="margin-bottom:16px">
             <label style="color:rgba(255,255,255,.7)">Qui êtes-vous ?</label>
             <select id="login-user" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:#fff;font-size:15px;padding:10px 13px;width:100%;border-radius:9px;-webkit-appearance:none;appearance:none">
-              <option value="">— Sélectionner —</option>
-              ${usersOpts}
+              <option value="" style="color:#1a1a1a;background:#fff">— Sélectionner —</option>
+              ${S.users.map(u=>`<option value="${esc(u.id)}" style="color:#1a1a1a;background:#fff">${esc(u.nom)}${u.admin?' (Admin)':''}</option>`).join('')}
             </select>
           </div>
           <div class="field" style="margin-bottom:20px">
