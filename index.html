@@ -154,6 +154,7 @@ canvas#sig-canvas{display:block;width:100%;height:140px;cursor:crosshair}
 mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 <div id="app"></div>
@@ -1253,25 +1254,34 @@ function vSuiviTournee(){
 async function doExportMultiple(rapports){
   if(!rapports.length)return;
   if(typeof JSZip==='undefined'){toast('Erreur : bibliothèque ZIP indisponible','#C0392B');return;}
-  toast('⏳ Préparation du ZIP…','#1B3A5C');
+  if(typeof html2pdf==='undefined'){toast('Erreur : bibliothèque PDF indisponible','#C0392B');return;}
+  toast(`⏳ Génération de ${rapports.length} PDF…`,'#1B3A5C');
   const zip=new JSZip();
   const usedNames=new Set();
-  rapports.forEach(r=>{
-    const pav=getPav(r.pavId);
-    const dateSlug=(r.createdAt?new Date(r.createdAt):new Date()).toISOString().slice(0,10);
-    let base=`${pav?.nom||r.pavId}_${dateSlug}`.replace(/[^a-zA-Z0-9_-]/g,'_');
-    let name=base+'.html',i=2;
-    while(usedNames.has(name)){name=`${base}_${i}.html`;i++;}
-    usedNames.add(name);
-    zip.file(name,exportRapport(r));
-  });
-  const blob=await zip.generateAsync({type:'blob'});
+  let done=0;
+  for(const r of rapports){
+    try{
+      const pav=getPav(r.pavId);
+      const dateSlug=(r.createdAt?new Date(r.createdAt):new Date()).toISOString().slice(0,10);
+      let base=`${pav?.nom||r.pavId}_${dateSlug}`.replace(/[^a-zA-Z0-9_-]/g,'_');
+      let name=base+'.pdf',i=2;
+      while(usedNames.has(name)){name=`${base}_${i}.pdf`;i++;}
+      usedNames.add(name);
+      const blob=await rapportToPdfBlob(r);
+      zip.file(name,blob);
+      done++;
+    }catch(e){
+      /* on continue les autres même si un PDF échoue */
+    }
+  }
+  if(done===0){toast('❌ Aucun PDF n\'a pu être généré','#C0392B');return;}
+  const zipBlob=await zip.generateAsync({type:'blob'});
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`rapports_ALM_${rapports.length}_${Date.now()}.zip`;
+  a.href=URL.createObjectURL(zipBlob);
+  a.download=`rapports_ALM_${done}_${Date.now()}.zip`;
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),3000);
-  toast(`📥 ${rapports.length} rapport${rapports.length>1?'s':''} exporté${rapports.length>1?'s':''} (.zip)`, '#2A7A4B');
+  toast(`📥 ${done} PDF exporté${done>1?'s':''} (.zip)`, '#2A7A4B');
 }
 
 /* ══════════════════════════════════════════════
@@ -1379,16 +1389,52 @@ ${r.signature?`<img src="${r.signature}" class="sig" alt="Signature">`:'<p style
 </body></html>`;
 }
 
-function doExportRapport(id){
+/* Convertit le HTML d'un rapport en PDF (blob) via html2pdf.js, sans
+   jamais afficher/imprimer — génération silencieuse dans un cadre invisible. */
+function rapportToPdfBlob(r){
+  return new Promise((resolve,reject)=>{
+    if(typeof html2pdf==='undefined'){reject(new Error('html2pdf indisponible'));return;}
+    const html=exportRapport(r);
+    const bodyMatch=html.match(/<body>([\s\S]*)<\/body>/);
+    const styleMatch=html.match(/<style>([\s\S]*?)<\/style>/);
+    const container=document.createElement('div');
+    container.style.cssText='position:fixed;left:-9999px;top:0;width:800px;background:#fff';
+    container.innerHTML=`<style>${styleMatch?styleMatch[1]:''}</style>${bodyMatch?bodyMatch[1]:''}`;
+    document.body.appendChild(container);
+    const pav=getPav(r.pavId);
+    const opt={
+      margin:[8,8,8,8],
+      filename:`${(pav?.nom||r.pavId)}.pdf`,
+      image:{type:'jpeg',quality:0.85},
+      html2canvas:{scale:2,useCORS:true},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['css','legacy']}
+    };
+    html2pdf().set(opt).from(container).outputPdf('blob').then(blob=>{
+      document.body.removeChild(container);
+      resolve(blob);
+    }).catch(err=>{
+      document.body.removeChild(container);
+      reject(err);
+    });
+  });
+}
+
+async function doExportRapport(id){
   const r=getRapport(id);if(!r)return;
   const pav=getPav(r.pavId);
-  const html=exportRapport(r);
-  const b=new Blob([html],{type:'text/html'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(b);
-  a.download=`rapport_${pav?.nom||r.pavId}_${r.id}.html`;
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+  toast('⏳ Génération du PDF…','#1B3A5C');
+  try{
+    const blob=await rapportToPdfBlob(r);
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`rapport_${(pav?.nom||r.pavId).replace(/[^a-zA-Z0-9_-]/g,'_')}_${r.id}.pdf`;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+    toast('📥 PDF téléchargé','#2A7A4B');
+  }catch(e){
+    toast('❌ Erreur génération PDF','#C0392B');
+  }
 }
 
 function doExportAll(){
@@ -1499,13 +1545,25 @@ function afterDraw(){
   if(S.view==='home'){
     const s=document.getElementById('search-in');
     if(s){
-      s.addEventListener('input',e=>{S.search=e.target.value;draw();});
+      s.addEventListener('input',e=>{
+        const pos=e.target.selectionStart;
+        S.search=e.target.value;
+        draw();
+        const el=document.getElementById('search-in');
+        if(el){el.focus();el.setSelectionRange(pos,pos);}
+      });
       s.focus();
     }
   }
   if(S.view==='tournee-edit'){
     const s=document.getElementById('tsearch-in');
-    if(s)s.addEventListener('input',e=>{S.tourneeSearch=e.target.value;draw();});
+    if(s)s.addEventListener('input',e=>{
+      const pos=e.target.selectionStart;
+      S.tourneeSearch=e.target.value;
+      draw();
+      const el=document.getElementById('tsearch-in');
+      if(el){el.focus();el.setSelectionRange(pos,pos);}
+    });
   }
   if(S.view==='form'){initSig();}
 
