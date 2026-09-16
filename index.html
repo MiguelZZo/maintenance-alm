@@ -1411,12 +1411,17 @@ function rapportToPdfBlob(r){
         img.onload=res;img.onerror=res;
       })));
       waitImgs.then(()=>{
+        /* L'iframe a une hauteur fixe au départ — sans l'ajuster, html2canvas
+           ne capture que la première "fenêtre" visible et tronque tout le
+           reste du rapport (c'est exactement ce qui se produisait). */
+        const fullHeight=Math.max(idoc.body.scrollHeight,idoc.documentElement.scrollHeight);
+        iframe.style.height=(fullHeight+40)+'px';
         const pav=getPav(r.pavId);
         const opt={
           margin:[8,8,8,8],
           filename:`${(pav?.nom||r.pavId)}.pdf`,
           image:{type:'jpeg',quality:0.85},
-          html2canvas:{scale:2,useCORS:true,windowWidth:800},
+          html2canvas:{scale:2,useCORS:true,windowWidth:800,windowHeight:fullHeight+40,height:fullHeight+40},
           jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
           pagebreak:{mode:['css','legacy']}
         };
