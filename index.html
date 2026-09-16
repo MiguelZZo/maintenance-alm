@@ -1390,7 +1390,10 @@ ${r.signature?`<img src="${r.signature}" class="sig" alt="Signature">`:'<p style
 }
 
 /* Convertit le HTML d'un rapport en PDF (blob) via html2pdf.js, sans
-   jamais afficher/imprimer — génération silencieuse dans un cadre invisible. */
+   jamais afficher/imprimer — génération silencieuse dans un cadre invisible.
+   IMPORTANT : le conteneur doit être positionné en coordonnées POSITIVES
+   (jamais left/top négatifs) — html2canvas produit une capture blanche
+   quand l'élément est placé hors-écran par un décalage négatif. */
 function rapportToPdfBlob(r){
   return new Promise((resolve,reject)=>{
     if(typeof html2pdf==='undefined'){reject(new Error('html2pdf indisponible'));return;}
@@ -1398,24 +1401,34 @@ function rapportToPdfBlob(r){
     const bodyMatch=html.match(/<body>([\s\S]*)<\/body>/);
     const styleMatch=html.match(/<style>([\s\S]*?)<\/style>/);
     const container=document.createElement('div');
-    container.style.cssText='position:fixed;left:-9999px;top:0;width:800px;background:#fff';
+    container.style.cssText='position:absolute;left:0;top:100000px;width:800px;background:#fff;z-index:-1';
     container.innerHTML=`<style>${styleMatch?styleMatch[1]:''}</style>${bodyMatch?bodyMatch[1]:''}`;
     document.body.appendChild(container);
-    const pav=getPav(r.pavId);
-    const opt={
-      margin:[8,8,8,8],
-      filename:`${(pav?.nom||r.pavId)}.pdf`,
-      image:{type:'jpeg',quality:0.85},
-      html2canvas:{scale:2,useCORS:true},
-      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-      pagebreak:{mode:['css','legacy']}
-    };
-    html2pdf().set(opt).from(container).outputPdf('blob').then(blob=>{
-      document.body.removeChild(container);
-      resolve(blob);
-    }).catch(err=>{
-      document.body.removeChild(container);
-      reject(err);
+
+    /* Attendre que toutes les images (photos, signature) soient chargées
+       avant de lancer la capture — sinon certaines apparaissent vides. */
+    const imgs=Array.from(container.querySelectorAll('img'));
+    const waitImgs=Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(res=>{
+      img.onload=res;img.onerror=res;
+    })));
+
+    waitImgs.then(()=>{
+      const pav=getPav(r.pavId);
+      const opt={
+        margin:[8,8,8,8],
+        filename:`${(pav?.nom||r.pavId)}.pdf`,
+        image:{type:'jpeg',quality:0.85},
+        html2canvas:{scale:2,useCORS:true,windowWidth:800},
+        jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+        pagebreak:{mode:['css','legacy']}
+      };
+      html2pdf().set(opt).from(container).outputPdf('blob').then(blob=>{
+        document.body.removeChild(container);
+        resolve(blob);
+      }).catch(err=>{
+        document.body.removeChild(container);
+        reject(err);
+      });
     });
   });
 }
