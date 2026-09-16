@@ -154,7 +154,7 @@ canvas#sig-canvas{display:block;width:100%;height:140px;cursor:crosshair}
 mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <div id="app"></div>
@@ -1254,7 +1254,7 @@ function vSuiviTournee(){
 async function doExportMultiple(rapports){
   if(!rapports.length)return;
   if(typeof JSZip==='undefined'){toast('Erreur : bibliothèque ZIP indisponible','#C0392B');return;}
-  if(typeof html2pdf==='undefined'){toast('Erreur : bibliothèque PDF indisponible','#C0392B');return;}
+  if(!window.jspdf){toast('Erreur : bibliothèque PDF indisponible','#C0392B');return;}
   toast(`⏳ Génération de ${rapports.length} PDF…`,'#1B3A5C');
   const zip=new JSZip();
   const usedNames=new Set();
@@ -1267,7 +1267,8 @@ async function doExportMultiple(rapports){
       let name=base+'.pdf',i=2;
       while(usedNames.has(name)){name=`${base}_${i}.pdf`;i++;}
       usedNames.add(name);
-      const blob=await rapportToPdfBlob(r);
+      const doc=await generateRapportPdf(r);
+      const blob=doc.output('blob');
       zip.file(name,blob);
       done++;
     }catch(e){
@@ -1389,53 +1390,165 @@ ${r.signature?`<img src="${r.signature}" class="sig" alt="Signature">`:'<p style
 </body></html>`;
 }
 
-/* Convertit le HTML d'un rapport en PDF (blob) via html2pdf.js.
-   Génère le document dans un <iframe> isolé (srcdoc) plutôt que dans un
-   <div> caché de la page principale : un div hors-écran (coordonnées
-   négatives ou superposé à l'UI) produit une capture html2canvas blanche
-   ou corrompue. L'iframe a son propre contexte de rendu indépendant,
-   donc sa position dans la page n'affecte plus rien. */
-function rapportToPdfBlob(r){
-  return new Promise((resolve,reject)=>{
-    if(typeof html2pdf==='undefined'){reject(new Error('html2pdf indisponible'));return;}
-    const html=exportRapport(r);
-    const iframe=document.createElement('iframe');
-    iframe.style.cssText='position:fixed;top:-99999px;left:-99999px;width:800px;height:1131px;border:0;visibility:hidden';
-    document.body.appendChild(iframe);
-
-    iframe.onload=()=>{
-      const idoc=iframe.contentDocument;
-      const target=idoc.body;
-      const imgs=Array.from(idoc.querySelectorAll('img'));
-      const waitImgs=Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(res=>{
-        img.onload=res;img.onerror=res;
-      })));
-      waitImgs.then(()=>{
-        /* L'iframe a une hauteur fixe au départ — sans l'ajuster, html2canvas
-           ne capture que la première "fenêtre" visible et tronque tout le
-           reste du rapport (c'est exactement ce qui se produisait). */
-        const fullHeight=Math.max(idoc.body.scrollHeight,idoc.documentElement.scrollHeight);
-        iframe.style.height=(fullHeight+40)+'px';
-        const pav=getPav(r.pavId);
-        const opt={
-          margin:[8,8,8,8],
-          filename:`${(pav?.nom||r.pavId)}.pdf`,
-          image:{type:'jpeg',quality:0.85},
-          html2canvas:{scale:2,useCORS:true,windowWidth:800,windowHeight:fullHeight+40,height:fullHeight+40},
-          jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-          pagebreak:{mode:['css','legacy']}
-        };
-        html2pdf().set(opt).from(target).outputPdf('blob').then(blob=>{
-          document.body.removeChild(iframe);
-          resolve(blob);
-        }).catch(err=>{
-          document.body.removeChild(iframe);
-          reject(err);
-        });
-      });
-    };
-    iframe.srcdoc=html;
+/* Charge une image (data URI) et retourne ses dimensions naturelles —
+   nécessaire pour intégrer photos/signature dans le PDF sans les déformer. */
+function loadImageDims(src){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>resolve({width:img.naturalWidth||1,height:img.naturalHeight||1});
+    img.onerror=()=>resolve({width:1,height:1});
+    img.src=src;
   });
+}
+
+/* Génère le PDF d'un rapport en dessinant directement texte/tableaux/images
+   avec jsPDF — approche 100% fiable, contrairement au rendu HTML→Canvas
+   (html2canvas) qui tronquait ou blanchissait le contenu selon les cas. */
+async function generateRapportPdf(r){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const pav=getPav(r.pavId);
+  const pageW=doc.internal.pageSize.getWidth();
+  const pageH=doc.internal.pageSize.getHeight();
+  const mX=15,mTop=15,mBot=15;
+  const cW=pageW-mX*2;
+  let y=mTop;
+
+  const cBlue=[27,58,92],cGray=[107,114,128],cDark=[26,26,26],
+        cGreen=[42,122,75],cOrange=[224,123,42],cRed=[192,57,43];
+
+  const checkBreak=needed=>{
+    if(y+needed>pageH-mBot){doc.addPage();y=mTop;}
+  };
+
+  const sectionTitle=title=>{
+    checkBreak(11);
+    doc.setFont('helvetica','bold');doc.setFontSize(11);
+    doc.setTextColor(...cBlue);
+    doc.text(title,mX,y);
+    y+=2;
+    doc.setDrawColor(...cBlue);doc.setLineWidth(0.5);
+    doc.line(mX,y,pageW-mX,y);
+    y+=6;
+  };
+
+  const kv=(label,value)=>{
+    checkBreak(6);
+    doc.setFont('helvetica','normal');doc.setFontSize(9);
+    doc.setTextColor(...cGray);
+    doc.text(String(label),mX,y);
+    doc.setFont('helvetica','bold');doc.setTextColor(...cDark);
+    const lines=doc.splitTextToSize(String(value||'—'),cW-58);
+    doc.text(lines,mX+58,y);
+    y+=5*lines.length;
+  };
+
+  const textBlock=(title,text)=>{
+    if(!text)return;
+    sectionTitle(title);
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...cDark);
+    const lines=doc.splitTextToSize(String(text),cW);
+    lines.forEach(line=>{checkBreak(5);doc.text(line,mX,y);y+=5;});
+    y+=3;
+  };
+
+  /* En-tête */
+  doc.setFont('helvetica','bold');doc.setFontSize(14);doc.setTextColor(...cBlue);
+  doc.text("Fiche d'intervention — Maintenance ALM",mX,y);
+  const badgeColor=r.statut==='ok'?cGreen:cOrange;
+  const badgeTxt=r.statut==='ok'?'Conforme':'Non conforme';
+  doc.setFontSize(10);doc.setTextColor(...badgeColor);
+  doc.text(badgeTxt,pageW-mX,y,{align:'right'});
+  y+=5.5;
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...cGray);
+  doc.text('Abris Bac · Angers Loire Métropole',mX,y);
+  y+=4;
+  doc.setDrawColor(...cBlue);doc.setLineWidth(0.8);
+  doc.line(mX,y,pageW-mX,y);
+  y+=8;
+
+  /* Identification */
+  sectionTitle('Identification du point');
+  kv('N° PAV Plan',pav?.no);
+  kv('Nom borne',pav?.nom);
+  kv('Adresse',pav?.addr);
+  kv('Zone',pav?.zone);
+  kv('Coordonnées GPS',pav?.gps);
+  if(pav?.rem)kv('Remarque',pav.rem);
+  y+=3;
+
+  /* Intervention */
+  sectionTitle('Intervention');
+  kv('Opérateur',r.operateur);
+  kv('Date et heure',fdt(r.createdAt));
+  y+=3;
+
+  /* Photos */
+  if(r.photos&&r.photos.length){
+    sectionTitle('Photos');
+    const box=45,gap=5;
+    let x=mX,rowH=0;
+    for(const src of r.photos){
+      const d=await loadImageDims(src);
+      const ratio=d.width/d.height||1;
+      let w=box,h=box/ratio;
+      if(h>box){h=box;w=box*ratio;}
+      if(x+w>pageW-mX){x=mX;y+=rowH+gap;rowH=0;}
+      checkBreak(h+gap);
+      try{doc.addImage(src,'JPEG',x,y,w,h);}catch(e){}
+      x+=w+gap;
+      rowH=Math.max(rowH,h);
+    }
+    y+=rowH+gap+3;
+  }
+
+  /* Tâches effectuées */
+  sectionTitle('Tâches effectuées');
+  TACHES.forEach(t=>{
+    const v=r.taches[t.id]||{statut:'na'};
+    const stTxt=v.statut==='ok'?'Fait':v.statut==='ko'?'Non fait':'N/A';
+    const stCol=v.statut==='ok'?cGreen:v.statut==='ko'?cRed:cGray;
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...cDark);
+    const lines=doc.splitTextToSize(t.label,cW-35);
+    checkBreak(5*lines.length);
+    doc.text(lines,mX,y);
+    doc.setFont('helvetica','bold');doc.setTextColor(...stCol);
+    doc.text(stTxt,pageW-mX,y,{align:'right'});
+    y+=5*lines.length;
+  });
+  y+=3;
+
+  textBlock('Tâches supplémentaires',r.tachesLibres);
+  textBlock('Remarques et consignes',r.remarques);
+  textBlock('Commentaire général',r.commentaire);
+
+  /* Signature */
+  sectionTitle('Signature');
+  kv('Signataire',r.nomSignataire||r.operateur);
+  if(r.signature){
+    const d=await loadImageDims(r.signature);
+    const maxW=60,maxH=28;
+    const ratio=d.width/d.height||3;
+    let w=maxW,h=maxW/ratio;
+    if(h>maxH){h=maxH;w=maxH*ratio;}
+    checkBreak(h+4);
+    try{doc.addImage(r.signature,'PNG',mX,y,w,h);}catch(e){}
+    y+=h+4;
+  }else{
+    doc.setFont('helvetica','italic');doc.setFontSize(8);doc.setTextColor(...cGray);
+    doc.text('Aucune signature',mX,y);
+    y+=5;
+  }
+
+  /* Pied de page sur chaque page */
+  const pageCount=doc.internal.getNumberOfPages();
+  for(let i=1;i<=pageCount;i++){
+    doc.setPage(i);
+    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(190,190,190);
+    doc.text(`Document généré le ${fdt(Date.now())} — Maintenance ALM · Angers Loire Métropole`,pageW/2,pageH-8,{align:'center'});
+  }
+
+  return doc;
 }
 
 async function doExportRapport(id){
@@ -1443,12 +1556,8 @@ async function doExportRapport(id){
   const pav=getPav(r.pavId);
   toast('⏳ Génération du PDF…','#1B3A5C');
   try{
-    const blob=await rapportToPdfBlob(r);
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=`rapport_${(pav?.nom||r.pavId).replace(/[^a-zA-Z0-9_-]/g,'_')}_${r.id}.pdf`;
-    a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+    const doc=await generateRapportPdf(r);
+    doc.save(`rapport_${(pav?.nom||r.pavId).replace(/[^a-zA-Z0-9_-]/g,'_')}_${r.id}.pdf`);
     toast('📥 PDF téléchargé','#2A7A4B');
   }catch(e){
     toast('❌ Erreur génération PDF','#C0392B');
